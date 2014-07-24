@@ -2,27 +2,172 @@ package org.szernex.yabm.handler;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.MinecraftException;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
+import org.szernex.yabm.util.ConvertHelper;
+import org.szernex.yabm.util.FileHelper;
 import org.szernex.yabm.util.LogHelper;
 
-@SideOnly(Side.SERVER)
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 public class BackupTickHandler
 {
-	private int intervalCounter = ConfigHandler.backupInterval;
+	private int intervalCounter = getNewCounter();
 
 	@SubscribeEvent
 	public void onTick(TickEvent.ServerTickEvent event)
 	{
-		intervalCounter--;
+		// needed?
+		if (DimensionManager.getWorld(0).isRemote || !ConfigHandler.backupEnabled)
+		{
+			return;
+		}
+
+		if (event.phase == TickEvent.Phase.END)
+		{
+			intervalCounter--;
+		}
 
 		if (intervalCounter > 0)
 		{
 			return;
 		}
 
-		LogHelper.info("hello world");
+		/*LogHelper.info(Paths.get("").toAbsolutePath().toString());
 
-		intervalCounter = ConfigHandler.backupInterval;
+		try
+		{
+			LogHelper.info(DimensionManager.getCurrentSaveRootDirectory().getCanonicalPath());
+		}
+		catch (IOException ex)
+		{
+			LogHelper.error(ex.getMessage());
+		}*/
+
+		//LogHelper.info(event.world.isRemote);
+
+		startBackup();
+
+		intervalCounter = getNewCounter();
+	}
+
+	public void startBackup()
+	{
+		try
+		{
+			File targetpath = new File(ConfigHandler.targetPath).getCanonicalFile();
+			File targetfile = new File(targetpath, String.format("%s%s", ConfigHandler.filePrefix, getFormattedTimestamp()));
+			File rootpath = Paths.get("").toAbsolutePath().toFile();
+			File worldpath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
+			MinecraftServer server = MinecraftServer.getServer();
+			int counter = 0;
+			String tempname = targetfile.getName();
+
+			while (new File(tempname + ".zip").exists())
+			{
+				counter++;
+				tempname = targetfile.getName() + "_" + counter;
+			}
+
+			targetfile = new File(targetfile.getParentFile(), tempname + ".zip");
+
+			if (!targetpath.exists())
+			{
+				if (!targetpath.mkdir())
+				{
+					LogHelper.warn("Could not create backup directory " + targetpath + " - Aborting backup");
+					return;
+				}
+			}
+
+			LogHelper.info(String.format("Starting backup. Target file: %s; Root path: %s; World path: %s", targetfile, rootpath, worldpath));
+
+			if (server.getConfigurationManager() != null)
+			{
+				server.getConfigurationManager().saveAllPlayerData();
+			}
+
+			WorldServer worldserver;
+			boolean[] saveflags = new boolean[server.worldServers.length];
+
+			LogHelper.info("Turning auto-save off and saving worlds...");
+
+			for (int i = 0; i < server.worldServers.length; i++)
+			{
+				worldserver = server.worldServers[i];
+				saveflags[i] = worldserver.levelSaving;
+
+				try
+				{
+					worldserver.saveAllChunks(true, null);
+					worldserver.saveChunkData();
+					LogHelper.debug("Saved " + worldserver);
+				}
+				catch (MinecraftException ex)
+				{
+					LogHelper.warn("Failed to save " + worldserver + ": " + ex.getMessage());
+					ex.printStackTrace();
+				}
+			}
+
+			LogHelper.info("Worlds saved...");
+
+			Set<File> backuplist = new HashSet<File>();
+
+			for (String entry : ConfigHandler.includeList)
+			{
+				File f = new File(rootpath, entry);
+
+				if (f.isDirectory())
+				{
+					backuplist.addAll(FileHelper.getDirectoryContents(f));
+				}
+				else
+				{
+					backuplist.add(f);
+				}
+			}
+
+			backuplist.addAll(FileHelper.getDirectoryContents(worldpath));
+
+			LogHelper.debug("Backup list:\n" + backuplist);
+			LogHelper.info("Saving backup to " + targetfile);
+
+			FileHelper.createZipArchive(targetfile, backuplist);
+
+			LogHelper.info("Turning auto-save on...");
+
+			for (int i = 0; i < server.worldServers.length; i++)
+			{
+				server.worldServers[i].levelSaving = saveflags[i];
+			}
+
+			LogHelper.info("Backup finished.");
+		}
+		catch (IOException ex)
+		{
+			LogHelper.error("Error starting backup: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+
+	private int getNewCounter()
+	{
+		return ConvertHelper.secToTicks(ConfigHandler.backupInterval * 15); // DEBUG ------------------------------------------------------------
+	}
+
+	private String getFormattedTimestamp()
+	{
+		SimpleDateFormat format = new SimpleDateFormat(ConfigHandler.timestampFormat);
+
+		return format.format(new Date());
 	}
 }

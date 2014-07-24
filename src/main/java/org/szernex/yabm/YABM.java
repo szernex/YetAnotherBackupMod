@@ -4,6 +4,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.*;
+import org.szernex.yabm.handler.BackupTickHandler;
 import org.szernex.yabm.handler.ConfigHandler;
 import org.szernex.yabm.proxy.IProxy;
 import org.szernex.yabm.reference.Reference;
@@ -45,6 +46,8 @@ public class YABM
 	public void serverStarted(FMLServerStartedEvent event)
 	{
 		LogHelper.info("server started");
+		FMLCommonHandler.instance().bus().register(new BackupTickHandler());
+		LogHelper.info("BackupTickHandler registered");
 	}
 
 	@Mod.EventHandler
