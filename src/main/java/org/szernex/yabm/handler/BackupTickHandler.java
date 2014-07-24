@@ -161,7 +161,7 @@ public class BackupTickHandler
 
 	private int getNewCounter()
 	{
-		return ConvertHelper.secToTicks(ConfigHandler.backupInterval * 15); // DEBUG ------------------------------------------------------------
+		return ConvertHelper.secToTicks(ConfigHandler.backupInterval * 60);
 	}
 
 	private String getFormattedTimestamp()
