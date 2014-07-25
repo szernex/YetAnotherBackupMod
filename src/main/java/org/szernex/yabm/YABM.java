@@ -33,7 +33,6 @@ public class YABM
 	public void init(FMLInitializationEvent event)
 	{
 		LogHelper.info(Paths.get("").toAbsolutePath().toString());
-		//LogHelper.info(DimensionManager.getCurrentSaveRootDirectory().getParent());
 	}
 
 	@Mod.EventHandler
@@ -45,7 +44,6 @@ public class YABM
 	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent event)
 	{
-		LogHelper.info("server started");
 		FMLCommonHandler.instance().bus().register(new BackupTickHandler());
 		LogHelper.info("BackupTickHandler registered");
 	}
@@ -53,6 +51,6 @@ public class YABM
 	@Mod.EventHandler
 	public void serverStopping(FMLServerStoppingEvent event)
 	{
-		LogHelper.info("server stopping");
+
 	}
 }
