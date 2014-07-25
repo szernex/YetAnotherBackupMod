@@ -11,9 +11,12 @@ public class ConfigHandler
 {
 	public static Configuration configuration;
 
-	//public static boolean configValue = false;
-	public static String    targetPath = "..";
-	public static int       backupInterval = 10;
+	public static String    targetPath = "../backups";
+	public static String[]  backupTimes = {"12:00"};
+	public static boolean   backupEnabled = true;
+	public static String[]  includeList = {"banned-ips.json", "banned-players.json", "ops.json", "options.json", "server.properties", "usercache.json", "whitelist.json", "config", "crash-reports", "logs", "mods", "resourcepacks"};
+	public static String    filePrefix = "backup_";
+	public static String    timestampFormat = "y-MM-dd_HH-mm-ss";
 
 	public static void init(File configfile)
 	{
@@ -26,9 +29,13 @@ public class ConfigHandler
 
 	private static void loadConfig()
 	{
-		//configValue = configuration.getBoolean("configValue", Configuration.CATEGORY_GENERAL, false, "This is an example config value");
-		targetPath = configuration.getString("targetPath", Configuration.CATEGORY_GENERAL, "..", "The path where to store the backups.");
-		backupInterval = configuration.getInt("backupInterval", Configuration.CATEGORY_GENERAL, 10, 5, 1440, "The interval for backups to be made, in minutes.");
+		targetPath = configuration.getString("targetPath", Configuration.CATEGORY_GENERAL, "../backups", "The path where to store the backups.");
+		backupTimes = configuration.getStringList("backupTimes", Configuration.CATEGORY_GENERAL, new String[]{"12:00"}, "The times when to run a backup in 24h format.");
+		backupEnabled = configuration.getBoolean("backupEnabled", Configuration.CATEGORY_GENERAL, true, "Turns automatic backups on/off.");
+		includeList = configuration.getStringList("includeList", Configuration.CATEGORY_GENERAL, includeList, "List of files and folders to backup additionally to the current world save.");
+		filePrefix = configuration.getString("filePrefix", Configuration.CATEGORY_GENERAL, "backup_", "The prefix for the backup files.");
+		timestampFormat = configuration.getString("timestampFormat", Configuration.CATEGORY_GENERAL, "y-MM-dd_HH-mm-ss", "The format for the backup timestamp in Javas DateFormat format");
+
 
 		if (configuration.hasChanged())
 		{
