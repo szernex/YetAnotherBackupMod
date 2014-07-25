@@ -6,7 +6,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
-import org.szernex.yabm.util.ConvertHelper;
 import org.szernex.yabm.util.FileHelper;
 import org.szernex.yabm.util.LogHelper;
 
