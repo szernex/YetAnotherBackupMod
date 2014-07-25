@@ -20,43 +20,37 @@ import java.util.Set;
 
 public class BackupTickHandler
 {
-	private int intervalCounter = getNewCounter();
+	private String lastRun = "";
+	private boolean backupActive = false;
 
 	@SubscribeEvent
 	public void onTick(TickEvent.ServerTickEvent event)
 	{
+		String currenttime = getCurrentTime();
+
 		// needed?
-		if (DimensionManager.getWorld(0).isRemote || !ConfigHandler.backupEnabled)
+		if (DimensionManager.getWorld(0).isRemote
+				|| !ConfigHandler.backupEnabled
+				|| event.phase == TickEvent.Phase.START
+				|| currenttime.equalsIgnoreCase(lastRun)
+				|| backupActive)
 		{
 			return;
 		}
 
-		if (event.phase == TickEvent.Phase.END)
+		String[] times = ConfigHandler.backupTimes;
+
+		for (String t : times)
 		{
-			intervalCounter--;
+			if (currenttime.equalsIgnoreCase(t))
+			{
+				backupActive = true;
+				startBackup();
+				backupActive = false;
+				lastRun = currenttime;
+				return;
+			}
 		}
-
-		if (intervalCounter > 0)
-		{
-			return;
-		}
-
-		/*LogHelper.info(Paths.get("").toAbsolutePath().toString());
-
-		try
-		{
-			LogHelper.info(DimensionManager.getCurrentSaveRootDirectory().getCanonicalPath());
-		}
-		catch (IOException ex)
-		{
-			LogHelper.error(ex.getMessage());
-		}*/
-
-		//LogHelper.info(event.world.isRemote);
-
-		startBackup();
-
-		intervalCounter = getNewCounter();
 	}
 
 	public void startBackup()
@@ -64,7 +58,7 @@ public class BackupTickHandler
 		try
 		{
 			File targetpath = new File(ConfigHandler.targetPath).getCanonicalFile();
-			File targetfile = new File(targetpath, String.format("%s%s", ConfigHandler.filePrefix, getFormattedTimestamp()));
+			File targetfile = new File(targetpath, String.format("%s%s", ConfigHandler.filePrefix, getFileTimestamp()));
 			File rootpath = Paths.get("").toAbsolutePath().toFile();
 			File worldpath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
 			MinecraftServer server = MinecraftServer.getServer();
@@ -159,14 +153,16 @@ public class BackupTickHandler
 		}
 	}
 
-	private int getNewCounter()
-	{
-		return ConvertHelper.secToTicks(ConfigHandler.backupInterval * 60);
-	}
-
-	private String getFormattedTimestamp()
+	private String getFileTimestamp()
 	{
 		SimpleDateFormat format = new SimpleDateFormat(ConfigHandler.timestampFormat);
+
+		return format.format(new Date());
+	}
+
+	private String getCurrentTime()
+	{
+		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
 
 		return format.format(new Date());
 	}
