@@ -3,6 +3,8 @@ package org.szernex.yabm.handler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
@@ -21,15 +23,14 @@ public class BackupTickHandler
 {
 	private String lastRun = "";
 	private boolean backupActive = false;
+	private ServerConfigurationManager serverConfigManager = MinecraftServer.getServer().getConfigurationManager();
 
 	@SubscribeEvent
 	public void onTick(TickEvent.ServerTickEvent event)
 	{
 		String currenttime = getCurrentTime();
 
-		// needed?
-		if (DimensionManager.getWorld(0).isRemote
-				|| !ConfigHandler.backupEnabled
+		if (!ConfigHandler.backupEnabled
 				|| event.phase == TickEvent.Phase.START
 				|| currenttime.equalsIgnoreCase(lastRun)
 				|| backupActive)
@@ -57,7 +58,7 @@ public class BackupTickHandler
 		try
 		{
 			File targetpath = new File(ConfigHandler.targetPath).getCanonicalFile();
-			File targetfile = new File(targetpath, String.format("%s%s", ConfigHandler.filePrefix, getFileTimestamp()));
+			File targetfile = new File(targetpath, getArchiveFileName());
 			File rootpath = Paths.get("").toAbsolutePath().toFile();
 			File worldpath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
 			MinecraftServer server = MinecraftServer.getServer();
@@ -77,11 +78,13 @@ public class BackupTickHandler
 				if (!targetpath.mkdir())
 				{
 					LogHelper.warn("Could not create backup directory " + targetpath + " - Aborting backup");
+					serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: Could not create backup directory - Aborting."));
 					return;
 				}
 			}
 
 			LogHelper.info(String.format("Starting backup. Target file: %s; Root path: %s; World path: %s", targetfile, rootpath, worldpath));
+			serverConfigManager.sendChatMsg(new ChatComponentText("Starting backup, prepare for possible lag..."));
 
 			if (server.getConfigurationManager() != null)
 			{
@@ -92,6 +95,7 @@ public class BackupTickHandler
 			boolean[] saveflags = new boolean[server.worldServers.length];
 
 			LogHelper.info("Turning auto-save off and saving worlds...");
+			serverConfigManager.sendChatMsg(new ChatComponentText("Turning auto-save off..."));
 
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
@@ -112,6 +116,7 @@ public class BackupTickHandler
 			}
 
 			LogHelper.info("Worlds saved...");
+			serverConfigManager.sendChatMsg(new ChatComponentText("Worlds saved."));
 
 			Set<File> backuplist = new HashSet<File>();
 
@@ -137,6 +142,7 @@ public class BackupTickHandler
 			FileHelper.createZipArchive(targetfile, backuplist);
 
 			LogHelper.info("Turning auto-save on...");
+			serverConfigManager.sendChatMsg(new ChatComponentText("Turning auto-save back on..."));
 
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
@@ -144,10 +150,12 @@ public class BackupTickHandler
 			}
 
 			LogHelper.info("Backup finished.");
+			serverConfigManager.sendChatMsg(new ChatComponentText("Backup finished."));
 		}
 		catch (IOException ex)
 		{
-			LogHelper.error("Error starting backup: " + ex.getMessage());
+			LogHelper.error("Error creating backup: " + ex.getMessage());
+			serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: " + ex.getMessage()));
 			ex.printStackTrace();
 		}
 	}
@@ -164,5 +172,21 @@ public class BackupTickHandler
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
 
 		return format.format(new Date());
+	}
+
+	private String getArchiveFileName()
+	{
+		String output;
+
+		if (MinecraftServer.getServer().isDedicatedServer())
+		{
+			output = String.format("%s_%s", ConfigHandler.filePrefix, getFileTimestamp());
+		}
+		else
+		{
+			output = String.format("%s_%s_%s", ConfigHandler.filePrefix, MinecraftServer.getServer().getWorldName(), getFileTimestamp());
+		}
+
+		return output;
 	}
 }

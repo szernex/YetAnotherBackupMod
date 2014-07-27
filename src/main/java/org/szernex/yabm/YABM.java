@@ -4,6 +4,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.*;
+import org.szernex.yabm.command.YABMCommand;
 import org.szernex.yabm.handler.BackupTickHandler;
 import org.szernex.yabm.handler.ConfigHandler;
 import org.szernex.yabm.proxy.IProxy;
@@ -21,6 +22,8 @@ public class YABM
 	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
 	public static IProxy proxy;
 
+	public static BackupTickHandler backupTickHandler;
+
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event)
@@ -33,7 +36,6 @@ public class YABM
 	public void init(FMLInitializationEvent event)
 	{
 		LogHelper.info(Paths.get("").toAbsolutePath().toString());
-		//LogHelper.info(DimensionManager.getCurrentSaveRootDirectory().getParent());
 	}
 
 	@Mod.EventHandler
@@ -43,16 +45,22 @@ public class YABM
 	}
 
 	@Mod.EventHandler
+	public void serverStarting(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new YABMCommand());
+	}
+
+	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent event)
 	{
-		LogHelper.info("server started");
-		FMLCommonHandler.instance().bus().register(new BackupTickHandler());
+		backupTickHandler = new BackupTickHandler();
+		FMLCommonHandler.instance().bus().register(backupTickHandler);
 		LogHelper.info("BackupTickHandler registered");
 	}
 
 	@Mod.EventHandler
 	public void serverStopping(FMLServerStoppingEvent event)
 	{
-		LogHelper.info("server stopping");
+
 	}
 }
