@@ -84,8 +84,7 @@ public class FileHelper
 
 			zip.close();
 			output.close();
-		}
-		catch (IOException ex)
+		} catch (IOException ex)
 		{
 			LogHelper.error("Error creating archive: " + ex.getMessage());
 			ex.printStackTrace();

@@ -22,6 +22,8 @@ public class YABM
 	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
 	public static IProxy proxy;
 
+	public static BackupTickHandler backupTickHandler;
+
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event)
@@ -51,7 +53,8 @@ public class YABM
 	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent event)
 	{
-		FMLCommonHandler.instance().bus().register(new BackupTickHandler());
+		backupTickHandler = new BackupTickHandler();
+		FMLCommonHandler.instance().bus().register(backupTickHandler);
 		LogHelper.info("BackupTickHandler registered");
 	}
 

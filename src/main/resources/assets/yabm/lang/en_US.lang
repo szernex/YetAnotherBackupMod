@@ -1,1 +1,1 @@
-commands.yabm.general.usage=/yabm <set <property> <value> | get <property>>
+commands.yabm.general.usage=/yabm <set|get|startbackup> [key] [value]

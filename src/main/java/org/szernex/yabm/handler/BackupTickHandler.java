@@ -30,9 +30,7 @@ public class BackupTickHandler
 	{
 		String currenttime = getCurrentTime();
 
-		// needed?
-		if (DimensionManager.getWorld(0).isRemote
-				|| !ConfigHandler.backupEnabled
+		if (!ConfigHandler.backupEnabled
 				|| event.phase == TickEvent.Phase.START
 				|| currenttime.equalsIgnoreCase(lastRun)
 				|| backupActive)
@@ -60,7 +58,7 @@ public class BackupTickHandler
 		try
 		{
 			File targetpath = new File(ConfigHandler.targetPath).getCanonicalFile();
-			File targetfile = new File(targetpath, String.format("%s%s", ConfigHandler.filePrefix, getFileTimestamp()));
+			File targetfile = new File(targetpath, getArchiveFileName());
 			File rootpath = Paths.get("").toAbsolutePath().toFile();
 			File worldpath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
 			MinecraftServer server = MinecraftServer.getServer();
@@ -109,8 +107,7 @@ public class BackupTickHandler
 					worldserver.saveAllChunks(true, null);
 					worldserver.saveChunkData();
 					LogHelper.debug("Saved " + worldserver);
-				}
-				catch (MinecraftException ex)
+				} catch (MinecraftException ex)
 				{
 					LogHelper.warn("Failed to save " + worldserver + ": " + ex.getMessage());
 					ex.printStackTrace();
@@ -153,8 +150,7 @@ public class BackupTickHandler
 
 			LogHelper.info("Backup finished.");
 			serverConfigManager.sendChatMsg(new ChatComponentText("Backup finished."));
-		}
-		catch (IOException ex)
+		} catch (IOException ex)
 		{
 			LogHelper.error("Error creating backup: " + ex.getMessage());
 			serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: " + ex.getMessage()));
@@ -174,5 +170,21 @@ public class BackupTickHandler
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
 
 		return format.format(new Date());
+	}
+
+	private String getArchiveFileName()
+	{
+		String output;
+
+		if (MinecraftServer.getServer().isDedicatedServer())
+		{
+			output = String.format("%s_%s", ConfigHandler.filePrefix, getFileTimestamp());
+		}
+		else
+		{
+			output = String.format("%s_%s_%s", ConfigHandler.filePrefix, MinecraftServer.getServer().getWorldName(), getFileTimestamp());
+		}
+
+		return output;
 	}
 }

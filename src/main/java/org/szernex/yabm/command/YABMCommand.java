@@ -3,9 +3,12 @@ package org.szernex.yabm.command;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
+import org.szernex.yabm.YABM;
 import org.szernex.yabm.handler.ConfigHandler;
-import org.szernex.yabm.util.LogHelper;
 import org.szernex.yabm.util.StringHelper;
 
 import java.util.ArrayList;
@@ -40,9 +43,6 @@ public class YABMCommand extends CommandBase
 	@Override
 	public List addTabCompletionOptions(ICommandSender sender, String[] args)
 	{
-		LogHelper.info(Arrays.deepToString(args));
-		LogHelper.info(args.length);
-
 		if (args.length == 1)
 		{
 			return StringHelper.getWordsStartingWith(args[0], availableCommands);
@@ -71,37 +71,93 @@ public class YABMCommand extends CommandBase
 	{
 		if (args.length == 0)
 		{
-			throw new WrongUsageException(this.getCommandUsage(sender), new Object[0]);
+			throw new WrongUsageException(getCommandUsage(sender));
 		}
 
 		String command = args[0];
 
 		if (command.equalsIgnoreCase("set"))
 		{
-
+			commandSet(sender, args);
 		}
 		else if (command.equalsIgnoreCase("get"))
 		{
-			String key = args[1].toLowerCase();
+			commandGet(sender, args);
+		}
+		else if (command.equalsIgnoreCase("startbackup"))
+		{
+			commandStartBackup(sender, args);
+		}
+	}
 
-			if (ConfigHandler.properties.containsKey(key))
+	private void commandSet(ICommandSender sender, String[] args)
+	{
+		String key = args[1];
+		String value = args[2];
+
+		if (ConfigHandler.properties.containsKey(key))
+		{
+			Property prop = ConfigHandler.configuration.get(Configuration.CATEGORY_GENERAL, key, "");
+			Object obj = ConfigHandler.properties.get(key);
+
+			try
 			{
-				String result = "";
-				Object value = ConfigHandler.properties.get(key);
-
-				if (value instanceof String[])
+				if (obj instanceof String)
 				{
-					result = Arrays.deepToString((String[]) value);
+					prop.set(value);
 				}
-				else
+				else if (obj instanceof Integer)
 				{
-					result = value.toString();
+					prop.set(Integer.valueOf(value));
+				}
+				else if (obj instanceof Boolean)
+				{
+					prop.set(Boolean.valueOf(value));
+				}
+				else if (obj instanceof String[])
+				{
+					prop.set(Arrays.copyOfRange(args, 2, args.length));
+				}
+				else if (obj instanceof Double)
+				{
+					prop.set(Double.valueOf(value));
 				}
 
-				sender.addChatMessage(new ChatComponentText(key + ": " + result));
+				ConfigHandler.configuration.save();
+				ConfigHandler.loadConfig();
+				sender.addChatMessage(new ChatComponentText("Set " + key + " to " + Arrays.deepToString(Arrays.copyOfRange(args, 2, args.length))));
+			} catch (NumberFormatException ex)
+			{
+				sender.addChatMessage(new ChatComponentText("Invalid value type for " + key));
 			}
 		}
+	}
 
+	private void commandGet(ICommandSender sender, String[] args)
+	{
+		String key = args[1];
 
+		if (ConfigHandler.properties.containsKey(key))
+		{
+			String result;
+			Object value = ConfigHandler.properties.get(key);
+
+			if (value instanceof String[])
+			{
+				result = Arrays.deepToString((String[]) value);
+			}
+			else
+			{
+				result = value.toString();
+			}
+
+			sender.addChatMessage(new ChatComponentText(key + ": " + result));
+		}
+	}
+
+	private void commandStartBackup(ICommandSender sender, String[] args)
+	{
+		MinecraftServer.getServer().addChatMessage(new ChatComponentText(sender.getCommandSenderName() + " manually started a backup"));
+		YABM.backupTickHandler.startBackup();
 	}
 }
