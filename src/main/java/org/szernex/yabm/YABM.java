@@ -4,6 +4,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.*;
+import org.szernex.yabm.command.YABMCommand;
 import org.szernex.yabm.handler.BackupTickHandler;
 import org.szernex.yabm.handler.ConfigHandler;
 import org.szernex.yabm.proxy.IProxy;
@@ -39,6 +40,12 @@ public class YABM
 	public void postInit(FMLPostInitializationEvent event)
 	{
 
+	}
+
+	@Mod.EventHandler
+	public void serverStarting(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new YABMCommand());
 	}
 
 	@Mod.EventHandler
