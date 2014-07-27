@@ -107,7 +107,8 @@ public class BackupTickHandler
 					worldserver.saveAllChunks(true, null);
 					worldserver.saveChunkData();
 					LogHelper.debug("Saved " + worldserver);
-				} catch (MinecraftException ex)
+				}
+				catch (MinecraftException ex)
 				{
 					LogHelper.warn("Failed to save " + worldserver + ": " + ex.getMessage());
 					ex.printStackTrace();
@@ -150,7 +151,8 @@ public class BackupTickHandler
 
 			LogHelper.info("Backup finished.");
 			serverConfigManager.sendChatMsg(new ChatComponentText("Backup finished."));
-		} catch (IOException ex)
+		}
+		catch (IOException ex)
 		{
 			LogHelper.error("Error creating backup: " + ex.getMessage());
 			serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: " + ex.getMessage()));

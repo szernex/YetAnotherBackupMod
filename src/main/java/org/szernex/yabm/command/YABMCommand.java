@@ -126,7 +126,8 @@ public class YABMCommand extends CommandBase
 				ConfigHandler.configuration.save();
 				ConfigHandler.loadConfig();
 				sender.addChatMessage(new ChatComponentText("Set " + key + " to " + Arrays.deepToString(Arrays.copyOfRange(args, 2, args.length))));
-			} catch (NumberFormatException ex)
+			}
+			catch (NumberFormatException ex)
 			{
 				sender.addChatMessage(new ChatComponentText("Invalid value type for " + key));
 			}
