@@ -63,3 +63,11 @@ processResources {
         exclude 'mcmod.info'
     }
 }
+
+task release (dependsOn: jar) << {
+    copy {
+        from 'build/libs'
+        into project.rootDir
+        include project.archivesBaseName + '-' + project.version + '.jar'
+    }
+}
