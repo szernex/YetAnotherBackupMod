@@ -20,6 +20,9 @@ public class ConfigHandler
 	public static String[] includeList = {"banned-ips.json", "banned-players.json", "ops.json", "options.json", "server.properties", "usercache.json", "whitelist.json", "config", "crash-reports", "logs", "mods", "resourcepacks"};
 	public static String filePrefix = "backup";
 	public static String timestampFormat = "y-MM-dd_HH-mm-ss";
+	public static int maxBackupCount = 5;
+	public static int backupInterval = 180;
+	public static boolean enableIntervalBackup = false;
 
 	public static void init(File configfile)
 	{
@@ -38,6 +41,9 @@ public class ConfigHandler
 		properties.put("includeList", includeList = configuration.getStringList("includeList", Configuration.CATEGORY_GENERAL, includeList, "List of files and folders to backup additionally to the current world save."));
 		properties.put("filePrefix", filePrefix = configuration.getString("filePrefix", Configuration.CATEGORY_GENERAL, "backup", "The prefix for the backup files. On SP it will be formatted 'prefix_worldname_timestamp', on dedicated servers 'prefix_timestamp'."));
 		properties.put("timestampFormat", timestampFormat = configuration.getString("timestampFormat", Configuration.CATEGORY_GENERAL, "y-MM-dd_HH-mm-ss", "The format for the backup timestamp in Javas DateFormat format"));
+		properties.put("maxBackupCount", maxBackupCount = configuration.getInt("maxBackupCount", Configuration.CATEGORY_GENERAL, 5, 1, 100, "The maximum number of backups to keep. If the backup count exceeds this number the oldest backup(s) will be deleted."));
+		properties.put("backupInterval", backupInterval = configuration.getInt("backupInterval", Configuration.CATEGORY_GENERAL, 180, 5, Integer.MAX_VALUE, "The interval in minutes between backups. enableIntervalBackup needs to be set to true to enable this. Especially useful in single player worlds."));
+		properties.put("enableIntervalBackup", enableIntervalBackup = configuration.getBoolean("enableIntervalBackup", Configuration.CATEGORY_GENERAL, false, "When this is set to true backupTimes will be ignored and instead backups get created every X minutes specified via backupInterval."));
 
 		if (configuration.hasChanged())
 		{
