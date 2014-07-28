@@ -11,8 +11,6 @@ import org.szernex.yabm.proxy.IProxy;
 import org.szernex.yabm.reference.Reference;
 import org.szernex.yabm.util.LogHelper;
 
-import java.nio.file.Paths;
-
 @Mod(modid = Reference.MOD_ID, version = Reference.VERSION, name = Reference.MOD_NAME, guiFactory = Reference.GUI_FACTORY_CLASS)
 public class YABM
 {
@@ -35,7 +33,7 @@ public class YABM
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent event)
 	{
-		LogHelper.info(Paths.get("").toAbsolutePath().toString());
+
 	}
 
 	@Mod.EventHandler
