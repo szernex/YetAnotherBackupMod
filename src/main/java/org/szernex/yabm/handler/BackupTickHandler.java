@@ -22,12 +22,14 @@ public class BackupTickHandler
 {
 	private String lastRun = "";
 	private boolean backupActive = false;
+	private String nextBackupTime = getNextIntervalTime();
 	private ServerConfigurationManager serverConfigManager = MinecraftServer.getServer().getConfigurationManager();
 
 	@SubscribeEvent
 	public void onTick(TickEvent.ServerTickEvent event)
 	{
-		String currenttime = getCurrentTime();
+		String currenttime = getFormattedTime(System.currentTimeMillis());
+		boolean runbackup = false;
 
 		if (!ConfigHandler.backupEnabled
 				|| event.phase == TickEvent.Phase.START
@@ -37,18 +39,31 @@ public class BackupTickHandler
 			return;
 		}
 
-		String[] times = ConfigHandler.backupTimes;
-
-		for (String t : times)
+		if (ConfigHandler.enableIntervalBackup)
 		{
-			if (currenttime.equalsIgnoreCase(t))
+			runbackup = currenttime.equalsIgnoreCase(nextBackupTime);
+		}
+		else
+		{
+			String[] times = ConfigHandler.backupTimes;
+
+			for (String t : times)
 			{
-				backupActive = true;
-				startBackup();
-				backupActive = false;
-				lastRun = currenttime;
-				return;
+				if (currenttime.equalsIgnoreCase(t))
+				{
+					runbackup = true;
+					break;
+				}
 			}
+		}
+
+		if (runbackup)
+		{
+			backupActive = true;
+			startBackup();
+			backupActive = false;
+			lastRun = currenttime;
+			nextBackupTime = getNextIntervalTime();
 		}
 	}
 
@@ -224,6 +239,12 @@ public class BackupTickHandler
 		}
 	}
 
+	private String getNextIntervalTime()
+	{
+		LogHelper.info(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000));
+		return getFormattedTime(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000));
+	}
+
 	private String getFileTimestamp()
 	{
 		SimpleDateFormat format = new SimpleDateFormat(ConfigHandler.timestampFormat);
@@ -231,11 +252,11 @@ public class BackupTickHandler
 		return format.format(new Date());
 	}
 
-	private String getCurrentTime()
+	private String getFormattedTime(long timestamp)
 	{
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
 
-		return format.format(new Date());
+		return format.format(new Date(timestamp));
 	}
 
 	private String getArchiveFileName(boolean includetimestamp)
