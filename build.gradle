@@ -68,7 +68,7 @@ processResources {
 }
 
 def int getBuildNumber() {
-    def buildNumber = Integer.parseInt(config.build_number) + (project.hasProperty(ext.bumpBuildProperty) ? 1 : 0)
+    def buildNumber = Integer.parseInt(config.build_number) + (project.hasProperty(project.bumpBuildProperty) ? 1 : 0)
     def newNr = "build_number = " + buildNumber
     def file = new File(project.propertiesFile)
 
@@ -78,7 +78,7 @@ def int getBuildNumber() {
 }
 
 task resetBuild << {
-    def file = new File(ext.propertiesFile)
+    def file = new File(project.propertiesFile)
 
     file.write(file.getText("UTF-8").replaceAll("build_number =.*", "build_number = 1"))
 }
