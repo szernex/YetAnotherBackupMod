@@ -91,7 +91,7 @@ public class BackupTickHandler
 
 			if (!targetpath.exists())
 			{
-				if (!targetpath.mkdir())
+				if (!targetpath.mkdirs())
 				{
 					LogHelper.warn("Could not create backup directory " + targetpath + " - Aborting backup");
 					serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: Could not create backup directory - Aborting."));
