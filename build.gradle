@@ -19,16 +19,19 @@ buildscript {
 apply plugin: 'forge'
 
 
-ext.configFile = file "build.properties"
+ext.bumpBuildProperty = "newBuild"
+ext.propertiesFile = "build.properties"
+
+
+ext.configFile = file propertiesFile
 configFile.withReader {
     def prop = new Properties()
     prop.load(it)
     project.ext.config = new ConfigSlurper().parse prop
 }
 
-
-version = config.mc_version + "-" + config.mod_version
-group= "org.szernex.yabm"
+version = "${config.mc_version}-${config.mod_version}.${getBuildNumber()}"
+group = "org.szernex.yabm"
 archivesBaseName = "YABM"
 
 
@@ -63,3 +66,27 @@ processResources {
         exclude 'mcmod.info'
     }
 }
+
+def int getBuildNumber() {
+    def buildNumber = Integer.parseInt(config.build_number) + (project.hasProperty(ext.bumpBuildProperty) ? 1 : 0)
+    def newNr = "build_number = " + buildNumber
+    def file = new File(project.propertiesFile)
+
+    file.write(file.getText("UTF-8").replaceAll("build_number =.*", newNr))
+
+    return buildNumber
+}
+
+task resetBuild << {
+    def file = new File(ext.propertiesFile)
+
+    file.write(file.getText("UTF-8").replaceAll("build_number =.*", "build_number = 1"))
+}
+
+task release << {
+    getBuildNumber()
+}
+
+release.onlyIf { project.hasProperty(ext.bumpBuildProperty) }
+
+jar.dependsOn release
