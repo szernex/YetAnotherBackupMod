@@ -27,8 +27,8 @@ configFile.withReader {
 }
 
 
-version = config.mc_version + "-" + config.mod_version
-group= "org.szernex.yabm"
+version = config.mc_version + "-" + config.mod_version + "." + increaseBuildNumber()//config.build_number
+group = "org.szernex.yabm"
 archivesBaseName = "YABM"
 
 
@@ -63,3 +63,25 @@ processResources {
         exclude 'mcmod.info'
     }
 }
+
+def int increaseBuildNumber() {
+    def buildNumber = Integer.parseInt(config.build_number) + 1
+    def newNr = "build_number = " + buildNumber
+    def file = new File("build.properties")
+
+    file.write(file.getText("UTF-8").replaceAll("build_number =.*", newNr))
+
+    return buildNumber
+}
+
+task resetBuild << {
+    def file = new File("build.properties")
+
+    file.write(file.getText("UTF-8").replaceAll("build_number =.*", "build_number = 1"))
+}
+
+task release << {
+    increaseBuildNumber()
+}
+
+jar.dependsOn release
