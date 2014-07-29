@@ -27,7 +27,7 @@ configFile.withReader {
 }
 
 
-version = config.mc_version + "-" + config.mod_version + "." + increaseBuildNumber()//config.build_number
+version = config.mc_version + "-" + config.mod_version + "." + getBuildNumber()//config.build_number
 group = "org.szernex.yabm"
 archivesBaseName = "YABM"
 
@@ -64,8 +64,8 @@ processResources {
     }
 }
 
-def int increaseBuildNumber() {
-    def buildNumber = Integer.parseInt(config.build_number) + 1
+def int getBuildNumber() {
+    def buildNumber = Integer.parseInt(config.build_number) + (project.hasProperty("bumpBuild") ? 1 : 0)
     def newNr = "build_number = " + buildNumber
     def file = new File("build.properties")
 
@@ -81,7 +81,9 @@ task resetBuild << {
 }
 
 task release << {
-    increaseBuildNumber()
+    getBuildNumber()
 }
+
+release.onlyIf { project.hasProperty("bumpBuild") }
 
 jar.dependsOn release
