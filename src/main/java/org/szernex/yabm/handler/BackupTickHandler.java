@@ -75,20 +75,16 @@ public class BackupTickHandler
 		try
 		{
 			File targetpath = new File(ConfigHandler.targetPath).getCanonicalFile();
-			File targetfile = new File(targetpath, getArchiveFileName(true));
+			File targetfile = new File(targetpath, getArchiveFileName(true) + ".zip");
 			File rootpath = Paths.get("").toAbsolutePath().toFile();
 			File worldpath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
 			MinecraftServer server = MinecraftServer.getServer();
-			int counter = 0;
-			String tempname = targetfile.getName();
 
-			while (new File(tempname + ".zip").exists())
+			if (targetfile.exists())
 			{
-				counter++;
-				tempname = targetfile.getName() + "_" + counter;
+				LogHelper.warn("File " + targetfile.toString() + " already exists - Aborting");
+				return;
 			}
-
-			targetfile = new File(targetfile.getParentFile(), tempname + ".zip");
 
 			if (!targetpath.exists())
 			{
@@ -103,12 +99,8 @@ public class BackupTickHandler
 			LogHelper.info(String.format("Starting backup. Target file: %s; Root path: %s; World path: %s", targetfile, rootpath, worldpath));
 			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.backup_start"));
 
-			if (server.getConfigurationManager() != null)
-			{
-				server.getConfigurationManager().saveAllPlayerData();
-			}
+			serverConfigManager.saveAllPlayerData();
 
-			WorldServer worldserver;
 			boolean[] saveflags = new boolean[server.worldServers.length];
 
 			LogHelper.info("Turning auto-save off and saving worlds...");
@@ -116,7 +108,7 @@ public class BackupTickHandler
 
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
-				worldserver = server.worldServers[i];
+				WorldServer worldserver = server.worldServers[i];
 				saveflags[i] = worldserver.levelSaving;
 
 				try
