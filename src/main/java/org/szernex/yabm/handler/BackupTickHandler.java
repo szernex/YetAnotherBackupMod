@@ -8,6 +8,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import org.szernex.yabm.util.ChatHelper;
 import org.szernex.yabm.util.FileHelper;
 import org.szernex.yabm.util.LogHelper;
 
@@ -94,13 +95,13 @@ public class BackupTickHandler
 				if (!targetpath.mkdirs())
 				{
 					LogHelper.warn("Could not create backup directory " + targetpath + " - Aborting backup");
-					serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: Could not create backup directory - Aborting."));
+					serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.create_dir_failed"));
 					return;
 				}
 			}
 
 			LogHelper.info(String.format("Starting backup. Target file: %s; Root path: %s; World path: %s", targetfile, rootpath, worldpath));
-			serverConfigManager.sendChatMsg(new ChatComponentText("Starting backup, prepare for possible lag..."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.backup_start"));
 
 			if (server.getConfigurationManager() != null)
 			{
@@ -111,7 +112,7 @@ public class BackupTickHandler
 			boolean[] saveflags = new boolean[server.worldServers.length];
 
 			LogHelper.info("Turning auto-save off and saving worlds...");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Turning auto-save off..."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.autosave_off"));
 
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
@@ -132,7 +133,7 @@ public class BackupTickHandler
 			}
 
 			LogHelper.info("Worlds saved...");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Worlds saved."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.worlds_saved"));
 
 			Set<File> backuplist = new HashSet<File>();
 
@@ -158,7 +159,7 @@ public class BackupTickHandler
 			FileHelper.createZipArchive(targetfile, backuplist);
 
 			LogHelper.info("Turning auto-save on...");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Turning auto-save back on..."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.autosave_on"));
 
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
@@ -166,13 +167,13 @@ public class BackupTickHandler
 			}
 
 			LogHelper.info("Backup finished.");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Backup finished."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.backup_finished"));
 		}
 		catch (IOException ex)
 		{
 			LogHelper.error("Error creating backup: " + ex.getMessage());
-			serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: " + ex.getMessage()));
 			ex.printStackTrace();
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.create_backup_failed", ex.getMessage()));
 		}
 	}
 
@@ -197,14 +198,9 @@ public class BackupTickHandler
 		catch (IOException ex)
 		{
 			LogHelper.error("Error during consolidation: " + ex.getMessage());
-			serverConfigManager.sendChatMsg(new ChatComponentText("Error during consolidation: " + ex.getMessage()));
 			ex.printStackTrace();
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.consolidation_failed", ex.getMessage()));
 			return;
-		}
-
-		if (files != null)
-		{
-			LogHelper.info(files.length);
 		}
 
 		if (files == null || files.length <= backupcount)
@@ -223,8 +219,8 @@ public class BackupTickHandler
 
 		files = Arrays.copyOfRange(files, 0, files.length - backupcount);
 
-		LogHelper.info("Maximum backup count exceeded; deleting " + files.length + " old backups...");
-		serverConfigManager.sendChatMsg(new ChatComponentText("Maximum backup count exceeded; deleting " + files.length + " old backups..."));
+		LogHelper.info("Deleting " + files.length + " old backups...");
+		serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.consolidate_backups", files.length));
 
 		for (int i = 0; i < files.length; i++)
 		{
