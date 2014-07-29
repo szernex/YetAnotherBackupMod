@@ -1,1 +1,6 @@
 commands.yabm.general.usage=/yabm <set|get|startbackup> [key] [value]
+commands.yabm.get.get_success=Value for %s: %s
+commands.yabm.get.get_invalid_key=%s: no such key
+commands.yabm.set.set_success=Set %s to %s
+commands.yabm.set.set_invalid_value=Invalid value type for %s
+commands.yabm.startbackup.start=%s manually started a backup...
