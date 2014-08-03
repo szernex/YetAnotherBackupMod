@@ -4,7 +4,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
@@ -21,6 +20,8 @@ import java.util.*;
 
 public class BackupTickHandler
 {
+	public static final String TIMESTAMP_FORMAT = "y-MM-dd_HH-mm-ss";
+
 	private String lastRun = "";
 	private boolean backupActive = false;
 	private String nextBackupTime = getNextIntervalTime();
@@ -29,7 +30,7 @@ public class BackupTickHandler
 	@SubscribeEvent
 	public void onTick(TickEvent.ServerTickEvent event)
 	{
-		String currenttime = getFormattedTime(System.currentTimeMillis());
+		String currenttime = getFormattedTime(System.currentTimeMillis(), "HH:mm");
 		boolean runbackup = false;
 
 		if (!ConfigHandler.backupEnabled
@@ -70,11 +71,26 @@ public class BackupTickHandler
 
 	public void startBackup()
 	{
+		if (ConfigHandler.enablePersistentBackup && isFirstBackup())
+		{
+			LogHelper.info("Starting persistent backup...");
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.persistent_start"));
+
+			backup(ConfigHandler.persistentPath);
+		}
+		else
+		{
+			backup(ConfigHandler.targetPath);
+		}
+	}
+
+	private void backup(String path)
+	{
 		checkConsolidation();
 
 		try
 		{
-			File targetpath = new File(ConfigHandler.targetPath).getCanonicalFile();
+			File targetpath = new File(path).getCanonicalFile();
 			File targetfile = new File(targetpath, getArchiveFileName(true) + ".zip");
 			File rootpath = Paths.get("").toAbsolutePath().toFile();
 			File worldpath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
@@ -169,6 +185,46 @@ public class BackupTickHandler
 		}
 	}
 
+	private boolean isFirstBackup()
+	{
+		File targetpath;
+		File[] files;
+		String timestamp = getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT);
+		final String filter = String.format("%s%s", getArchiveFileName(false), timestamp.substring(0, timestamp.indexOf("_")));
+
+		LogHelper.info(filter);
+
+		try
+		{
+			targetpath = new File(ConfigHandler.persistentPath).getCanonicalFile();
+
+			if (!targetpath.exists())
+			{
+				return true;
+			}
+
+			files = targetpath.listFiles(new FileFilter()
+			{
+				@Override
+				public boolean accept(File file)
+				{
+					return (file.isFile() && file.getName().startsWith(filter));
+				}
+			});
+
+			LogHelper.info(files.length);
+
+			return (files.length == 0);
+		}
+		catch (IOException ex)
+		{
+			LogHelper.error("Error reading persistent directory: " + ex.getMessage());
+			ex.printStackTrace();
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.persistent_failed", ex.getMessage()));
+			return false;
+		}
+	}
+
 	private void checkConsolidation()
 	{
 		File targetpath;
@@ -214,37 +270,29 @@ public class BackupTickHandler
 		LogHelper.info("Deleting " + files.length + " old backups...");
 		serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.consolidate_backups", files.length));
 
-		for (int i = 0; i < files.length; i++)
+		for (File f : files)
 		{
-			if (files[i].delete())
+			if (f.delete())
 			{
-				LogHelper.debug("Deleted old backup " + files[i].getName());
+				LogHelper.debug("Deleted old backup " + f.getName());
 			}
 			else
 			{
-				LogHelper.warn("Could not delete backup " + files[i].getName());
+				LogHelper.warn("Could not delete backup " + f.getName());
 			}
 		}
 	}
 
 	private String getNextIntervalTime()
 	{
-		LogHelper.info(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000));
-		return getFormattedTime(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000));
+		return getFormattedTime(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000), "HH:mm");
 	}
 
-	private String getFileTimestamp()
+	private String getFormattedTime(long timestamp, String format)
 	{
-		SimpleDateFormat format = new SimpleDateFormat(ConfigHandler.timestampFormat);
+		SimpleDateFormat dateformat = new SimpleDateFormat(format);
 
-		return format.format(new Date());
-	}
-
-	private String getFormattedTime(long timestamp)
-	{
-		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-
-		return format.format(new Date(timestamp));
+		return dateformat.format(new Date(timestamp));
 	}
 
 	private String getArchiveFileName(boolean includetimestamp)
@@ -253,11 +301,11 @@ public class BackupTickHandler
 
 		if (MinecraftServer.getServer().isDedicatedServer())
 		{
-			output = String.format("%s_%s", ConfigHandler.filePrefix, (includetimestamp ? getFileTimestamp() : ""));
+			output = String.format("%s_%s", ConfigHandler.filePrefix, (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
 		}
 		else
 		{
-			output = String.format("%s_%s_%s", ConfigHandler.filePrefix, MinecraftServer.getServer().getWorldName(), (includetimestamp ? getFileTimestamp() : ""));
+			output = String.format("%s_%s_%s", ConfigHandler.filePrefix, MinecraftServer.getServer().getWorldName(), (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
 		}
 
 		return output;
