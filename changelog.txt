@@ -1,0 +1,3 @@
+v1.7.10-0.4.1
+* Added: Persistent backups; options can be found in the config
+* Changed: timestampFormat can no longer be configured due to programmatic reasons
