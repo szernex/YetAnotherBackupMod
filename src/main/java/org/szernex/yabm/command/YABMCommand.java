@@ -4,11 +4,11 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import org.szernex.yabm.YABM;
 import org.szernex.yabm.handler.ConfigHandler;
+import org.szernex.yabm.util.ChatHelper;
 import org.szernex.yabm.util.StringHelper;
 
 import java.util.ArrayList;
@@ -88,12 +88,16 @@ public class YABMCommand extends CommandBase
 		{
 			commandStartBackup(sender, args);
 		}
+		else
+		{
+			throw new WrongUsageException(getCommandUsage(sender));
+		}
 	}
 
 	private void commandSet(ICommandSender sender, String[] args)
 	{
 		String key = args[1];
-		String value = args[2];
+		String[] values = Arrays.copyOfRange(args, 2, args.length);
 
 		if (ConfigHandler.properties.containsKey(key))
 		{
@@ -104,32 +108,32 @@ public class YABMCommand extends CommandBase
 			{
 				if (obj instanceof String)
 				{
-					prop.set(value);
+					prop.set(values[0]);
 				}
 				else if (obj instanceof Integer)
 				{
-					prop.set(Integer.valueOf(value));
+					prop.set(Integer.valueOf(values[0]));
 				}
 				else if (obj instanceof Boolean)
 				{
-					prop.set(Boolean.valueOf(value));
+					prop.set(Boolean.valueOf(values[0]));
 				}
 				else if (obj instanceof String[])
 				{
-					prop.set(Arrays.copyOfRange(args, 2, args.length));
+					prop.set(values);
 				}
 				else if (obj instanceof Double)
 				{
-					prop.set(Double.valueOf(value));
+					prop.set(Double.valueOf(values[0]));
 				}
 
 				ConfigHandler.configuration.save();
 				ConfigHandler.loadConfig();
-				sender.addChatMessage(new ChatComponentText("Set " + key + " to " + Arrays.deepToString(Arrays.copyOfRange(args, 2, args.length))));
+				sender.addChatMessage(ChatHelper.getLocalizedChatComponent("commands.yabm.set.set_success", key, Arrays.deepToString(values)));
 			}
 			catch (NumberFormatException ex)
 			{
-				sender.addChatMessage(new ChatComponentText("Invalid value type for " + key));
+				sender.addChatMessage(ChatHelper.getLocalizedChatComponent("commands.yabm.set.set_invalid_value", key));
 			}
 		}
 	}
@@ -152,13 +156,17 @@ public class YABMCommand extends CommandBase
 				result = value.toString();
 			}
 
-			sender.addChatMessage(new ChatComponentText(key + ": " + result));
+			sender.addChatMessage(ChatHelper.getLocalizedChatComponent("commands.yabm.get.get_success", key, result));
+		}
+		else
+		{
+			sender.addChatMessage(ChatHelper.getLocalizedChatComponent("commands.yabm.get.get_invalid_key", key));
 		}
 	}
 
 	private void commandStartBackup(ICommandSender sender, String[] args)
 	{
-		MinecraftServer.getServer().addChatMessage(new ChatComponentText(sender.getCommandSenderName() + " manually started a backup"));
+		MinecraftServer.getServer().getConfigurationManager().sendChatMsg(ChatHelper.getLocalizedChatComponent("commands.yabm.startbackup.start", sender.getCommandSenderName()));
 		YABM.backupTickHandler.startBackup();
 	}
 }

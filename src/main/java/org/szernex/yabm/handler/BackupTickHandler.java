@@ -4,10 +4,10 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import org.szernex.yabm.util.ChatHelper;
 import org.szernex.yabm.util.FileHelper;
 import org.szernex.yabm.util.LogHelper;
 
@@ -20,6 +20,8 @@ import java.util.*;
 
 public class BackupTickHandler
 {
+	public static final String TIMESTAMP_FORMAT = "y-MM-dd_HH-mm-ss";
+
 	private String lastRun = "";
 	private boolean backupActive = false;
 	private String nextBackupTime = getNextIntervalTime();
@@ -28,7 +30,7 @@ public class BackupTickHandler
 	@SubscribeEvent
 	public void onTick(TickEvent.ServerTickEvent event)
 	{
-		String currenttime = getFormattedTime(System.currentTimeMillis());
+		String currenttime = getFormattedTime(System.currentTimeMillis(), "HH:mm");
 		boolean runbackup = false;
 
 		if (!ConfigHandler.backupEnabled
@@ -69,53 +71,60 @@ public class BackupTickHandler
 
 	public void startBackup()
 	{
+		if (ConfigHandler.enablePersistentBackup && isFirstBackup())
+		{
+			LogHelper.info("Starting persistent backup...");
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.persistent_start"));
+
+			backup(ConfigHandler.persistentPath);
+		}
+		else
+		{
+			backup(ConfigHandler.targetPath);
+		}
+	}
+
+	private void backup(String path)
+	{
 		checkConsolidation();
 
 		try
 		{
-			File targetpath = new File(ConfigHandler.targetPath).getCanonicalFile();
-			File targetfile = new File(targetpath, getArchiveFileName(true));
+			File targetpath = new File(path).getCanonicalFile();
+			File targetfile = new File(targetpath, getArchiveFileName(true) + ".zip");
 			File rootpath = Paths.get("").toAbsolutePath().toFile();
 			File worldpath = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
 			MinecraftServer server = MinecraftServer.getServer();
-			int counter = 0;
-			String tempname = targetfile.getName();
 
-			while (new File(tempname + ".zip").exists())
+			if (targetfile.exists())
 			{
-				counter++;
-				tempname = targetfile.getName() + "_" + counter;
+				LogHelper.warn("File " + targetfile.toString() + " already exists - Aborting");
+				return;
 			}
-
-			targetfile = new File(targetfile.getParentFile(), tempname + ".zip");
 
 			if (!targetpath.exists())
 			{
 				if (!targetpath.mkdirs())
 				{
 					LogHelper.warn("Could not create backup directory " + targetpath + " - Aborting backup");
-					serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: Could not create backup directory - Aborting."));
+					serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.create_dir_failed"));
 					return;
 				}
 			}
 
 			LogHelper.info(String.format("Starting backup. Target file: %s; Root path: %s; World path: %s", targetfile, rootpath, worldpath));
-			serverConfigManager.sendChatMsg(new ChatComponentText("Starting backup, prepare for possible lag..."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.backup_start"));
 
-			if (server.getConfigurationManager() != null)
-			{
-				server.getConfigurationManager().saveAllPlayerData();
-			}
+			serverConfigManager.saveAllPlayerData();
 
-			WorldServer worldserver;
 			boolean[] saveflags = new boolean[server.worldServers.length];
 
 			LogHelper.info("Turning auto-save off and saving worlds...");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Turning auto-save off..."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.autosave_off"));
 
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
-				worldserver = server.worldServers[i];
+				WorldServer worldserver = server.worldServers[i];
 				saveflags[i] = worldserver.levelSaving;
 
 				try
@@ -132,7 +141,7 @@ public class BackupTickHandler
 			}
 
 			LogHelper.info("Worlds saved...");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Worlds saved."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.worlds_saved"));
 
 			Set<File> backuplist = new HashSet<File>();
 
@@ -158,7 +167,7 @@ public class BackupTickHandler
 			FileHelper.createZipArchive(targetfile, backuplist);
 
 			LogHelper.info("Turning auto-save on...");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Turning auto-save back on..."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.autosave_on"));
 
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
@@ -166,13 +175,53 @@ public class BackupTickHandler
 			}
 
 			LogHelper.info("Backup finished.");
-			serverConfigManager.sendChatMsg(new ChatComponentText("Backup finished."));
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.backup_finished"));
 		}
 		catch (IOException ex)
 		{
 			LogHelper.error("Error creating backup: " + ex.getMessage());
-			serverConfigManager.sendChatMsg(new ChatComponentText("Error creating backup: " + ex.getMessage()));
 			ex.printStackTrace();
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.create_backup_failed", ex.getMessage()));
+		}
+	}
+
+	private boolean isFirstBackup()
+	{
+		File targetpath;
+		File[] files;
+		String timestamp = getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT);
+		final String filter = String.format("%s%s", getArchiveFileName(false), timestamp.substring(0, timestamp.indexOf("_")));
+
+		LogHelper.info(filter);
+
+		try
+		{
+			targetpath = new File(ConfigHandler.persistentPath).getCanonicalFile();
+
+			if (!targetpath.exists())
+			{
+				return true;
+			}
+
+			files = targetpath.listFiles(new FileFilter()
+			{
+				@Override
+				public boolean accept(File file)
+				{
+					return (file.isFile() && file.getName().startsWith(filter));
+				}
+			});
+
+			LogHelper.info(files.length);
+
+			return (files.length == 0);
+		}
+		catch (IOException ex)
+		{
+			LogHelper.error("Error reading persistent directory: " + ex.getMessage());
+			ex.printStackTrace();
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.persistent_failed", ex.getMessage()));
+			return false;
 		}
 	}
 
@@ -197,14 +246,9 @@ public class BackupTickHandler
 		catch (IOException ex)
 		{
 			LogHelper.error("Error during consolidation: " + ex.getMessage());
-			serverConfigManager.sendChatMsg(new ChatComponentText("Error during consolidation: " + ex.getMessage()));
 			ex.printStackTrace();
+			serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.error.consolidation_failed", ex.getMessage()));
 			return;
-		}
-
-		if (files != null)
-		{
-			LogHelper.info(files.length);
 		}
 
 		if (files == null || files.length <= backupcount)
@@ -223,40 +267,32 @@ public class BackupTickHandler
 
 		files = Arrays.copyOfRange(files, 0, files.length - backupcount);
 
-		LogHelper.info("Maximum backup count exceeded; deleting " + files.length + " old backups...");
-		serverConfigManager.sendChatMsg(new ChatComponentText("Maximum backup count exceeded; deleting " + files.length + " old backups..."));
+		LogHelper.info("Deleting " + files.length + " old backups...");
+		serverConfigManager.sendChatMsg(ChatHelper.getLocalizedChatComponent("yabm.backup.general.consolidate_backups", files.length));
 
-		for (int i = 0; i < files.length; i++)
+		for (File f : files)
 		{
-			if (files[i].delete())
+			if (f.delete())
 			{
-				LogHelper.debug("Deleted old backup " + files[i].getName());
+				LogHelper.debug("Deleted old backup " + f.getName());
 			}
 			else
 			{
-				LogHelper.warn("Could not delete backup " + files[i].getName());
+				LogHelper.warn("Could not delete backup " + f.getName());
 			}
 		}
 	}
 
 	private String getNextIntervalTime()
 	{
-		LogHelper.info(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000));
-		return getFormattedTime(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000));
+		return getFormattedTime(System.currentTimeMillis() + (ConfigHandler.backupInterval * 60 * 1000), "HH:mm");
 	}
 
-	private String getFileTimestamp()
+	private String getFormattedTime(long timestamp, String format)
 	{
-		SimpleDateFormat format = new SimpleDateFormat(ConfigHandler.timestampFormat);
+		SimpleDateFormat dateformat = new SimpleDateFormat(format);
 
-		return format.format(new Date());
-	}
-
-	private String getFormattedTime(long timestamp)
-	{
-		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-
-		return format.format(new Date(timestamp));
+		return dateformat.format(new Date(timestamp));
 	}
 
 	private String getArchiveFileName(boolean includetimestamp)
@@ -265,11 +301,11 @@ public class BackupTickHandler
 
 		if (MinecraftServer.getServer().isDedicatedServer())
 		{
-			output = String.format("%s_%s", ConfigHandler.filePrefix, (includetimestamp ? getFileTimestamp() : ""));
+			output = String.format("%s_%s", ConfigHandler.filePrefix, (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
 		}
 		else
 		{
-			output = String.format("%s_%s_%s", ConfigHandler.filePrefix, MinecraftServer.getServer().getWorldName(), (includetimestamp ? getFileTimestamp() : ""));
+			output = String.format("%s_%s_%s", ConfigHandler.filePrefix, MinecraftServer.getServer().getWorldName(), (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
 		}
 
 		return output;
