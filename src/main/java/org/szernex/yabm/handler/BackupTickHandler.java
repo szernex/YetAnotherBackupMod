@@ -131,12 +131,4 @@ public class BackupTickHandler
 			return false;
 		}
 	}
-
-
-
-
-
-
-
-
 }
