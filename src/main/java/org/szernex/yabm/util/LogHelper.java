@@ -6,48 +6,58 @@ import org.szernex.yabm.reference.Reference;
 
 public class LogHelper
 {
-	public static void log(Level level, Object object)
+	public static void log(Level level, Object message, Object... args)
 	{
-		FMLLog.log(Reference.MOD_NAME, level, String.valueOf(object));
+		if (message != null)
+		{
+			if (message instanceof String)
+			{
+				FMLLog.log(Reference.MOD_NAME, level, String.format((String) message, args));
+			}
+			else
+			{
+				FMLLog.log(Reference.MOD_NAME, level, String.valueOf(message));
+			}
+		}
 	}
 
-	public static void all(Object object)
+	public static void all(Object message, Object... args)
 	{
-		log(Level.ALL, object);
+		log(Level.ALL, message, args);
 	}
 
-	public static void debug(Object object)
+	public static void debug(Object message, Object... args)
 	{
-		log(Level.DEBUG, object);
+		log(Level.DEBUG, message, args);
 	}
 
-	public static void info(Object object)
+	public static void info(Object message, Object... args)
 	{
-		log(Level.INFO, object);
+		log(Level.INFO, message, args);
 	}
 
-	public static void error(Object object)
+	public static void error(Object message, Object... args)
 	{
-		log(Level.ERROR, object);
+		log(Level.ERROR, message, args);
 	}
 
-	public static void fatal(Object object)
+	public static void fatal(Object message, Object... args)
 	{
-		log(Level.FATAL, object);
+		log(Level.FATAL, message, args);
 	}
 
-	public static void off(Object object)
+	public static void off(Object message, Object... args)
 	{
-		log(Level.OFF, object);
+		log(Level.OFF, message, args);
 	}
 
-	public static void trace(Object object)
+	public static void trace(Object message, Object... args)
 	{
-		log(Level.TRACE, object);
+		log(Level.TRACE, message, args);
 	}
 
-	public static void warn(Object object)
+	public static void warn(Object message, Object... args)
 	{
-		log(Level.WARN, object);
+		log(Level.WARN, message, args);
 	}
 }
