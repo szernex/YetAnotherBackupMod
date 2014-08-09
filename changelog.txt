@@ -1,3 +1,8 @@
+v1.7.10-0.5.1
+* Complete overhaul of the code
+* Features are still the same, but code has been streamlined and optimized
+* Last beta version
+
 v1.7.10-0.4.1
 * Added: Persistent backups; options can be found in the config
 * Changed: timestampFormat can no longer be configured due to programmatic reasons
