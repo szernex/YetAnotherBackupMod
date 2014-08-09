@@ -1,7 +1,10 @@
 package org.szernex.yabm.util;
 
+import net.minecraft.server.MinecraftServer;
+
 import java.io.*;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -9,15 +12,30 @@ import java.util.zip.ZipOutputStream;
 
 public class FileHelper
 {
-	private static FileFilter fileFilter = new FileFilter()
+	public static final String TIMESTAMP_FORMAT = "y-MM-dd_HH-mm-ss";
+
+	public static class BackupFileFilter implements FileFilter
 	{
+		private String nameFilter = "";
+
+		public BackupFileFilter()
+		{
+
+		}
+
+		public BackupFileFilter(String name_filter)
+		{
+			nameFilter = name_filter;
+		}
+
 		@Override
 		public boolean accept(File file)
 		{
-			return file.isFile();
+			return (file.isFile() && file.getName().startsWith(nameFilter));
 		}
-	};
-	private static FileFilter dirFilter = new FileFilter()
+	}
+
+	public static final FileFilter DIR_FILTER = new FileFilter()
 	{
 		@Override
 		public boolean accept(File file)
@@ -27,70 +45,132 @@ public class FileHelper
 	};
 
 
+	public static String getArchiveFileName(String prefix, boolean includetimestamp)
+	{
+		String output;
+
+		prefix = prefix.replaceAll(" ", "_");
+
+		if (MinecraftServer.getServer().isDedicatedServer())
+		{
+			output = String.format("%s_%s", prefix, (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
+		}
+		else
+		{
+			output = String.format("%s_%s_%s", prefix, MinecraftServer.getServer().getWorldName().replaceAll(" ", "_"), (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
+		}
+
+		return output;
+	}
+
+	public static String getFormattedTime(long timestamp, String format)
+	{
+		if (format == null)
+		{
+			format = TIMESTAMP_FORMAT;
+		}
+
+		SimpleDateFormat dateformat = new SimpleDateFormat(format);
+
+		return dateformat.format(new Date(timestamp));
+	}
+
 	public static Set<File> getDirectoryContents(File root)
 	{
 		Set<File> output = new HashSet<File>();
-		Set<File> dirs = new HashSet<File>();
+		File[] files;
 
-		output.addAll(Arrays.asList(root.listFiles(fileFilter)));
-		dirs.addAll(Arrays.asList(root.listFiles(dirFilter)));
-
-		for (File f : dirs)
+		if (root == null)
 		{
-			if (f.isDirectory())
+			return null;
+		}
+
+		files = root.listFiles();
+
+		if (files == null)
+		{
+			return null;
+		}
+
+		for (File f : files)
+		{
+			if (f.exists())
 			{
-				output.addAll(getDirectoryContents(f));
+				if (f.isDirectory())
+				{
+					output.addAll(getDirectoryContents(f));
+				}
+				else
+				{
+					output.add(f);
+				}
 			}
 		}
 
 		return output;
 	}
 
-	public static boolean createZipArchive(File file, Set<File> files)
+	public static Set<File> getFileList(String[] source_list) throws IOException
 	{
-		if (file.exists())
+		Set<File> output = new HashSet<File>();
+
+		for (String f : source_list)
 		{
-			LogHelper.warn("Cannot create archive " + file + ": file already exists");
+			File file = new File(f).getCanonicalFile();
+
+			if (file.exists())
+			{
+				if (file.isDirectory())
+				{
+					output.addAll(FileHelper.getDirectoryContents(file));
+				}
+				else
+				{
+					output.add(file);
+				}
+			}
+		}
+
+		return output;
+	}
+
+	public static boolean createZipArchive(File target_file, Set<File> source_files) throws IOException
+	{
+		if (target_file.exists())
+		{
+			LogHelper.error("Cannot create archive %s: file already exists", target_file);
 			return false;
 		}
 
-		try
+		FileOutputStream output = new FileOutputStream(target_file);
+		ZipOutputStream zip = new ZipOutputStream(output);
+
+		for (File f : source_files)
 		{
-			FileOutputStream output = new FileOutputStream(file);
-			ZipOutputStream zip = new ZipOutputStream(output);
-
-			for (File f : files)
+			if (!f.exists())
 			{
-				if (!f.exists())
-				{
-					continue;
-				}
-
-				LogHelper.debug("Adding to archive: " + f);
-				zip.putNextEntry(new ZipEntry(f.toString()));
-
-				byte[] bytes = new byte[1024];
-				int length;
-				FileInputStream input = new FileInputStream(f);
-
-				while ((length = input.read(bytes)) >= 0)
-				{
-					zip.write(bytes, 0, length);
-				}
-
-				zip.closeEntry();
-				input.close();
+				continue;
 			}
 
-			zip.close();
-			output.close();
-		}
-		catch (IOException ex)
-		{
-			LogHelper.error("Error creating archive: " + ex.getMessage());
-			ex.printStackTrace();
+			LogHelper.debug("Adding to archive: " + f);
+			zip.putNextEntry(new ZipEntry(f.toString()));
+
+			byte[] bytes = new byte[1024];
+			int length;
+			FileInputStream input = new FileInputStream(f);
+
+			while ((length = input.read(bytes)) >= 0)
+			{
+				zip.write(bytes, 0, length);
+			}
+
+			zip.closeEntry();
+			input.close();
 		}
 
-		return false;
+		zip.close();
+		output.close();
+
+		return true;
 	}
 }
