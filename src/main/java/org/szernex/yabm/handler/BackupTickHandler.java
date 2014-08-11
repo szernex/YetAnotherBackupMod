@@ -39,11 +39,11 @@ public class BackupTickHandler
 	{
 		if (isPersistentBackup())
 		{
-			backupTask.init(ConfigHandler.persistentLocation, ConfigHandler.backupPrefix, ConfigHandler.backupList);
+			backupTask.init(ConfigHandler.persistentLocation, ConfigHandler.backupPrefix, ConfigHandler.backupList, ConfigHandler.compressionLevel);
 		}
 		else
 		{
-			backupTask.init(ConfigHandler.backupLocation, ConfigHandler.backupPrefix, ConfigHandler.backupList);
+			backupTask.init(ConfigHandler.backupLocation, ConfigHandler.backupPrefix, ConfigHandler.backupList, ConfigHandler.compressionLevel);
 		}
 
 		new Thread(backupTask).run();

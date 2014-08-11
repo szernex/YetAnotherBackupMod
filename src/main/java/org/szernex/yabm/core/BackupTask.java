@@ -21,13 +21,15 @@ public class BackupTask implements Runnable
 	private String targetPath;
 	private String filePrefix;
 	private String[] sourceList;
+	private int compressionLevel;
 	private ServerConfigurationManager serverConfigurationManager = MinecraftServer.getServer().getConfigurationManager();
 
-	public void init(String target_path, String file_prefix, String[] source_list)
+	public void init(String target_path, String file_prefix, String[] source_list, int compression_level)
 	{
 		targetPath = target_path;
 		filePrefix = file_prefix;
 		sourceList = source_list;
+		compressionLevel = compression_level;
 	}
 
 	public void run()
@@ -101,7 +103,7 @@ public class BackupTask implements Runnable
 			source_files.addAll(FileHelper.getDirectoryContents(world_dir));
 			LogHelper.info("Archiving %d files...", source_files.size());
 
-			if (FileHelper.createZipArchive(target_file, source_files))
+			if (FileHelper.createZipArchive(target_file, source_files, compressionLevel))
 			{
 				LogHelper.info("Successfully created backup archive.");
 			}

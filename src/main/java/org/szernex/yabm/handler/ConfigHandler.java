@@ -23,6 +23,7 @@ public class ConfigHandler
 	public static boolean persistentEnabled = true;
 	public static String persistentLocation = "../backups/persistent";
 	public static int maxBackupCount = 0;
+	public static int compressionLevel = 9;
 
 
 	public static void init(File config_file)
@@ -95,6 +96,15 @@ public class ConfigHandler
 				               0,
 				               Integer.MAX_VALUE,
 				               "The maximum number of backups to keep per world. 0 disables this functionality. Persistent backups are excluded from this."
+		               ));
+		properties.put("compressionLevel",
+		               compressionLevel = configuration.getInt(
+				               "compressionLevel",
+		                       category,
+		                       9,
+		                       0,
+		                       9,
+		                       "The zip compression level to use, 0 being no compression and 9 maximum compression."
 		               ));
 
 		if (configuration.hasChanged())
