@@ -134,7 +134,7 @@ public class FileHelper
 		return output;
 	}
 
-	public static boolean createZipArchive(File target_file, Set<File> source_files) throws IOException
+	public static boolean createZipArchive(File target_file, Set<File> source_files, int compression_level) throws IOException
 	{
 		if (target_file.exists())
 		{
@@ -144,6 +144,13 @@ public class FileHelper
 
 		FileOutputStream output = new FileOutputStream(target_file);
 		ZipOutputStream zip = new ZipOutputStream(output);
+
+		zip.setMethod(ZipOutputStream.DEFLATED);
+
+		if (compression_level >= 0 && compression_level <= 9)
+		{
+			zip.setLevel(compression_level);
+		}
 
 		for (File f : source_files)
 		{
