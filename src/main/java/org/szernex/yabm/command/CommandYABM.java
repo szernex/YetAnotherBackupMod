@@ -13,6 +13,8 @@ public class CommandYABM extends CommandBase
 
 	public CommandYABM()
 	{
+		super();
+
 		availableCommands.put("get", new CommandGet());
 		availableCommands.put("set", new CommandSet());
 		availableCommands.put("startbackup", new CommandStartBackup());
