@@ -57,7 +57,7 @@ public class FileHelper
 		}
 		else
 		{
-			output = String.format("%s_%s_%s", prefix, MinecraftServer.getServer().getWorldName().replaceAll(" ", "_"), (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
+			output = String.format("%s_%s_%s", prefix, MinecraftServer.getServer().getFolderName().replaceAll(" ", "_"), (includetimestamp ? getFormattedTime(System.currentTimeMillis(), TIMESTAMP_FORMAT) : ""));
 		}
 
 		return output;
