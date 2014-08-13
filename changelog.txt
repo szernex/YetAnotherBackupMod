@@ -1,3 +1,8 @@
+v1.7.10-0.5.4
+* Added: Prototype FTP upload functionality
+* Fixed: World auto-saving not properly being turned off during backups
+* Fixed: Threads actually being started for backups
+
 v1.7.10-0.5.1
 * Complete overhaul of the code
 * Features are still the same, but code has been streamlined and optimized
