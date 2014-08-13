@@ -22,7 +22,13 @@ public class BackupTask implements Runnable
 	private String filePrefix;
 	private String[] sourceList;
 	private int compressionLevel;
+	private File lastBackupFile;
 	private ServerConfigurationManager serverConfigurationManager = MinecraftServer.getServer().getConfigurationManager();
+
+	public File getLastBackupFile()
+	{
+		return lastBackupFile;
+	}
 
 	public void init(String target_path, String file_prefix, String[] source_list, int compression_level)
 	{
@@ -42,6 +48,7 @@ public class BackupTask implements Runnable
 		}
 
 		LogHelper.info("Backup lock acquired, starting backup...");
+		lastBackupFile = null;
 
 		try
 		{
@@ -76,11 +83,13 @@ public class BackupTask implements Runnable
 			MinecraftServer server = MinecraftServer.getServer();
 			boolean[] save_flags = new boolean[server.worldServers.length];
 
+			// disable auto-save
 			LogHelper.info("Turning auto-save off and saving worlds...");
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
 				WorldServer world_server = server.worldServers[i];
 				save_flags[i] = world_server.levelSaving;
+				world_server.levelSaving = false;
 
 				try
 				{
@@ -98,6 +107,7 @@ public class BackupTask implements Runnable
 			ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.general.worlds_saved"));
 
 
+			// create backup archive
 			Set<File> source_files = FileHelper.getFileList(sourceList);
 
 			source_files.addAll(FileHelper.getDirectoryContents(world_dir));
@@ -114,13 +124,14 @@ public class BackupTask implements Runnable
 			}
 
 
+			// re-enable auto-save
 			LogHelper.info("Turning auto-save back on...");
 			for (int i = 0; i < server.worldServers.length; i++)
 			{
 				server.worldServers[i].levelSaving = save_flags[i];
 			}
 
-
+			lastBackupFile = target_file;
 			LogHelper.info("Backup finished.");
 			ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.general.backup_finished"));
 		}

@@ -29,6 +29,6 @@ public class CommandStartBackup extends CommandBase
 	public void processCommand(ICommandSender sender, String[] args)
 	{
 		ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("commands.yabm.startbackup.start", sender.getCommandSenderName()));
-		YABM.backupTickHandler.startBackup();
+		YABM.backupManager.startBackup();
 	}
 }

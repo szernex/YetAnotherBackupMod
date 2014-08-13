@@ -24,6 +24,12 @@ public class ConfigHandler
 	public static String persistentLocation = "../backups/persistent";
 	public static int maxBackupCount = 0;
 	public static int compressionLevel = 9;
+	public static boolean ftpEnabled = false;
+	public static String ftpLocation = "backups";
+	public static String ftpServer = "";
+	public static int ftpPort = 21;
+	public static String ftpUsername = "";
+	public static String ftpPassword = "";
 
 
 	public static void init(File config_file)
@@ -37,61 +43,61 @@ public class ConfigHandler
 
 	public static void loadConfig()
 	{
-		String category = Configuration.CATEGORY_GENERAL;
+		String cat_general = Configuration.CATEGORY_GENERAL;
 
 		properties.put("backupEnabled",
 		               backupEnabled = configuration.getBoolean(
 				               "backupEnabled",
-				               category,
+				               cat_general,
 				               true,
 				               "Turn automatic backups on/off."
 		               ));
 		properties.put("backupLocation",
 		               backupLocation = configuration.getString(
 				               "backupLocation",
-				               category,
+				               cat_general,
 				               "../backups",
 				               "The path where to store backups. Can be a path relative to the Minecraft installation root."
 		               ));
 		properties.put("backupList",
 		               backupList = configuration.getStringList(
 				               "backupList",
-				               category,
+				               cat_general,
 				               backupList,
 				               "The list of files and folders to include in the backup."
 		               ));
 		properties.put("backupPrefix",
 		               backupPrefix = configuration.getString(
 				               "backupPrefix",
-				               category,
+				               cat_general,
 				               "backup",
 				               "The file prefix for the archive files. Final result will be 'prefix_TIMESTAMP.zip' on SMP or 'prefix_saveName_TIMESTAMP.zip' on SP."
 		               ));
 		properties.put("backupSchedule",
 		               backupSchedule = configuration.getString(
 				               "backupSchedule",
-				               category,
+				               cat_general,
 				               "12:00",
 				               "The schedule for automatic backups. Can either be a single number indicating the interval in minutes in which backups should be made, or a list of times in 24h format seperated by spaces. (ex.: 180 - does a backup every 3 hours; 4:00 12:00 20:00 - does a backup at the specified times)\nInterval backups are recommended for single player while scheduled backups are recommended for dedicated servers."
 		               ));
 		properties.put("persistentEnabled",
 		               persistentEnabled = configuration.getBoolean(
 				               "persistentEnabled",
-				               category,
+				               cat_general,
 				               true,
 				               "Turn persistent backups on/off. When enabled the first backup of each day will be stored in a separate location and is excluded from automatic consolidation."
 		               ));
 		properties.put("persistentLocation",
 		               persistentLocation = configuration.getString(
 				               "persistentLocation",
-				               category,
+				               cat_general,
 				               "../backups/persistent",
 				               "The path where to store persistent backups. Can be a path relative to the Minecraft installation root."
 		               ));
 		properties.put("maxBackupCount",
 		               maxBackupCount = configuration.getInt(
 				               "maxBackupCount",
-				               category,
+				               cat_general,
 				               0,
 				               0,
 				               Integer.MAX_VALUE,
@@ -100,11 +106,56 @@ public class ConfigHandler
 		properties.put("compressionLevel",
 		               compressionLevel = configuration.getInt(
 				               "compressionLevel",
-		                       category,
+		                       cat_general,
 		                       9,
 		                       0,
 		                       9,
 		                       "The zip compression level to use, 0 being no compression and 9 maximum compression."
+		               ));
+
+		properties.put("ftpEnabled",
+		               ftpEnabled = configuration.getBoolean(
+				               "ftpEnabled",
+				               cat_general,
+		                       false,
+		                       "Turns uploading backups via FTP on/off. If FTP uploads are enabled no local backups will be stored and consolidation and persistent backups are disabled."
+		               ));
+		properties.put("ftpLocation",
+		               ftpLocation = configuration.getString(
+				               "ftpLocation",
+				               cat_general,
+		                       "backups",
+		                       "The remote location on the FTP server to store backups."
+		               ));
+		properties.put("ftpServer",
+		               ftpServer = configuration.getString(
+				               "ftpServer",
+				               cat_general,
+		                       "",
+		                       "The FTP server address."
+		               ));
+		properties.put("ftpPort",
+		               ftpPort = configuration.getInt(
+				               "ftpPort",
+				               cat_general,
+		                       21,
+		                       1,
+		                       Integer.MAX_VALUE,
+		                       "The port to use."
+		               ));
+		properties.put("ftpUsername",
+		               ftpUsername = configuration.getString(
+				               "ftpUsername",
+				               cat_general,
+		                       "",
+		                       "The username to use when logging into the FTP server."
+		               ));
+		properties.put("ftpPassword",
+		               ftpPassword = configuration.getString(
+				               "ftpPassword",
+				               cat_general,
+		                       "",
+		                       "The password to use when logging into the FTP server."
 		               ));
 
 		if (configuration.hasChanged())

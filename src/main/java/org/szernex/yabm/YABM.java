@@ -6,6 +6,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import org.szernex.yabm.command.CommandYABM;
+import org.szernex.yabm.core.BackupManager;
 import org.szernex.yabm.handler.BackupTickHandler;
 import org.szernex.yabm.handler.ConfigHandler;
 import org.szernex.yabm.reference.Reference;
@@ -17,6 +18,7 @@ public class YABM
 	public static YABM instance;
 
 	public static BackupTickHandler backupTickHandler;
+	public static BackupManager backupManager;
 
 
 	@Mod.EventHandler
@@ -35,6 +37,7 @@ public class YABM
 	@Mod.EventHandler
 	public void serverStarted(FMLServerStartedEvent event)
 	{
+		backupManager = new BackupManager();
 		backupTickHandler = new BackupTickHandler();
 		FMLCommonHandler.instance().bus().register(backupTickHandler);
 	}
