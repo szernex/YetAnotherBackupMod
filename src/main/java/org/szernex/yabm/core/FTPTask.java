@@ -31,6 +31,7 @@ public class FTPTask implements Runnable
 	@Override
 	public void run()
 	{
+		LogHelper.info("FTP upload starting...");
 		ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.ftp.start"));
 
 		FTPClient ftp_client = new FTPClient();
@@ -59,11 +60,13 @@ public class FTPTask implements Runnable
 
 				if (success)
 				{
+					ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.ftp.upload_success"));
 					LogHelper.info("Uploaded successfully.");
 					targetFile.delete();
 				}
 				else
 				{
+					ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.error.ftp.upload_failed"));
 					LogHelper.warn("Upload failed.");
 				}
 			}

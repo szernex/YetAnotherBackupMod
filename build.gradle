@@ -40,11 +40,26 @@ minecraft {
 
     replaceIn "reference/Reference.java"
     replace "@VERSION@", config.mod_version
+
+    srgExtra "PK: org/apache/commons/net org/szernex/yabm/commons-net"
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
 }
 
 
 dependencies {
+    shade 'commons-net:commons-net:3.3'
+}
 
+jar {
+    configurations.shade.each { dep ->
+        from (project.zipTree(dep)) {
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
 }
 
 

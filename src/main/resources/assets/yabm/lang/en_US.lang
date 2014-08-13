@@ -3,9 +3,11 @@ yabm.backup.general.worlds_saved=Worlds saved.
 yabm.backup.general.backup_finished=Backup finished.
 yabm.backup.general.backup_consolidation=Deleting %d old backup(s)...
 yabm.backup.ftp.start=Starting FTP backup upload...
+yabm.backup.ftp.upload_success=Successfully uploaded backup.
 yabm.backup.error.backup_failed=Error during backup: %s
 yabm.backup.error.lock_failed=Failed to acquire backup lock, another thread is possibly still running...
 yabm.backup.error.archive_failed=Failed to create backup archive - Check logs for more info.
+yabm.backup.error.ftp.upload_failed=FTP upload failed.
 
 commands.yabm.general.usage=/yabm <get|set|startbackup> [key] [value]
 commands.yabm.get.success=Value for %s: %s
