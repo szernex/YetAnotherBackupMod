@@ -47,7 +47,7 @@ public class BackupManager implements Runnable
 		}
 		catch (IOException ex)
 		{
-			LogHelper.error("Error during persistent backup detection: %s" , ex.getMessage());
+			LogHelper.error("Error during persistent backup detection: %s", ex.getMessage());
 			ex.printStackTrace();
 			return false;
 		}
@@ -122,7 +122,7 @@ public class BackupManager implements Runnable
 	@Override
 	public void run()
 	{
-		backupTask.init((isPersistentBackup() && !ConfigHandler.ftpEnabled ? ConfigHandler.persistentLocation : ConfigHandler.backupLocation),
+		backupTask.init((isPersistentBackup() ? ConfigHandler.persistentLocation : ConfigHandler.backupLocation),
 		                ConfigHandler.backupPrefix,
 		                ConfigHandler.backupList,
 		                ConfigHandler.compressionLevel
@@ -145,7 +145,6 @@ public class BackupManager implements Runnable
 
 			startAndWaitForThread(ftpTask);
 		}
-
 
 		consolidateBackups();
 	}

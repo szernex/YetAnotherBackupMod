@@ -39,7 +39,7 @@ minecraft {
     version = config.mc_version + "-" + config.forge_version
 
     replaceIn "reference/Reference.java"
-    replace "@VERSION@", config.mod_version
+    replace "@VERSION@", config.mod_version + "." + getBuildNumber()
 
     srgExtra "PK: org/apache/commons/net org/szernex/yabm/commons-net"
 }
@@ -95,7 +95,7 @@ def int getBuildNumber() {
 task resetBuild << {
     def file = new File(project.propertiesFile)
 
-    file.write(file.getText("UTF-8").replaceAll("build_number =.*", "build_number = 1"))
+    file.write(file.getText("UTF-8").replaceAll("build_number =.*", "build_number = 0"))
 }
 
 task release << {

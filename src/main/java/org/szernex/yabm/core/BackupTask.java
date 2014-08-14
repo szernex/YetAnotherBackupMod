@@ -140,7 +140,8 @@ public class BackupTask implements Runnable
 			LogHelper.error("Error during backup: " + ex.getMessage());
 			ex.printStackTrace();
 			ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.error.backup_failed", ex.getMessage()));
-		} finally
+		}
+		finally
 		{
 			backupLock.unlock();
 			LogHelper.info("Backup lock released.");

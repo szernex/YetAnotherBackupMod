@@ -46,25 +46,6 @@ public class Time implements Comparable<Time>
 		return String.format("%02d:%02d", hour, minute);
 	}
 
-	public static boolean isValidTime(String input)
-	{
-		if (input == null)
-		{
-			return false;
-		}
-
-		if (input.matches("^\\d?\\d:\\d?\\d$"))
-		{
-			String[] parts = input.split(":");
-			int hours = Integer.valueOf(parts[0]);
-			int minutes = Integer.valueOf(parts[1]);
-
-			return ((hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59));
-		}
-
-		return false;
-	}
-
 	@Override
 	public int compareTo(Time t)
 	{
@@ -96,5 +77,24 @@ public class Time implements Comparable<Time>
 				return 0;
 			}
 		}
+	}
+
+	public static boolean isValidTime(String input)
+	{
+		if (input == null)
+		{
+			return false;
+		}
+
+		if (input.matches("^\\d{1,2}:\\d{1,2}$"))
+		{
+			String[] parts = input.split(":");
+			int hours = Integer.valueOf(parts[0]);
+			int minutes = Integer.valueOf(parts[1]);
+
+			return ((hours >= 0 && hours <= 23) && (minutes >= 0 && minutes <= 59));
+		}
+
+		return false;
 	}
 }
