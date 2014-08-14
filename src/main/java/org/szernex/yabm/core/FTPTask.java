@@ -62,7 +62,6 @@ public class FTPTask implements Runnable
 				{
 					ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.ftp.upload_success"));
 					LogHelper.info("Uploaded successfully.");
-					targetFile.delete();
 				}
 				else
 				{
