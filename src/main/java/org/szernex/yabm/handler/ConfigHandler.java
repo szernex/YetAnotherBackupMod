@@ -22,7 +22,7 @@ public class ConfigHandler
 	public static String backupSchedule = "12:00";
 	public static boolean persistentEnabled = true;
 	public static String persistentLocation = "../backups/persistent";
-	public static int maxBackupCount = 0;
+	public static int maxBackupCount = 10;
 	public static int compressionLevel = 9;
 	public static boolean ftpEnabled = false;
 	public static String ftpLocation = "backups";
@@ -98,7 +98,7 @@ public class ConfigHandler
 		               maxBackupCount = configuration.getInt(
 				               "maxBackupCount",
 				               cat_general,
-				               0,
+				               10,
 				               0,
 				               Integer.MAX_VALUE,
 				               "The maximum number of backups to keep per world. -1 disables this functionality. Persistent backups are excluded from this."
