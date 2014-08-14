@@ -35,7 +35,10 @@ public class ScheduleHelper
 
 			for (String time : list)
 			{
-				times.add(new Time(time));
+				if (Time.isValidTime(time))
+				{
+					times.add(new Time(time));
+				}
 			}
 
 			if (times.size() > 0)

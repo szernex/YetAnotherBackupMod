@@ -106,56 +106,56 @@ public class ConfigHandler
 		properties.put("compressionLevel",
 		               compressionLevel = configuration.getInt(
 				               "compressionLevel",
-		                       cat_general,
-		                       9,
-		                       0,
-		                       9,
-		                       "The zip compression level to use, 0 being no compression and 9 maximum compression."
+				               cat_general,
+				               9,
+				               0,
+				               9,
+				               "The zip compression level to use, 0 being no compression and 9 maximum compression."
 		               ));
 
 		properties.put("ftpEnabled",
 		               ftpEnabled = configuration.getBoolean(
 				               "ftpEnabled",
 				               cat_general,
-		                       false,
-		                       "Turns uploading backups via FTP on/off. If you want to not keep any local backups set maxBackupCount to 0 and persistentEnabled to false."
+				               false,
+				               "Turns uploading backups via FTP on/off. If you want to not keep any local backups set maxBackupCount to 0 and persistentEnabled to false."
 		               ));
 		properties.put("ftpLocation",
 		               ftpLocation = configuration.getString(
 				               "ftpLocation",
 				               cat_general,
-		                       "backups",
-		                       "The remote location on the FTP server to store backups."
+				               "backups",
+				               "The remote location on the FTP server to store backups."
 		               ));
 		properties.put("ftpServer",
 		               ftpServer = configuration.getString(
 				               "ftpServer",
 				               cat_general,
-		                       "",
-		                       "The FTP server address."
+				               "",
+				               "The FTP server address."
 		               ));
 		properties.put("ftpPort",
 		               ftpPort = configuration.getInt(
 				               "ftpPort",
 				               cat_general,
-		                       21,
-		                       1,
-		                       Integer.MAX_VALUE,
-		                       "The port to use."
+				               21,
+				               1,
+				               Integer.MAX_VALUE,
+				               "The port to use."
 		               ));
 		properties.put("ftpUsername",
 		               ftpUsername = configuration.getString(
 				               "ftpUsername",
 				               cat_general,
-		                       "",
-		                       "The username to use when logging into the FTP server."
+				               "",
+				               "The username to use when logging into the FTP server."
 		               ));
 		properties.put("ftpPassword",
 		               ftpPassword = configuration.getString(
 				               "ftpPassword",
 				               cat_general,
-		                       "",
-		                       "The password to use when logging into the FTP server."
+				               "",
+				               "The password to use when logging into the FTP server."
 		               ));
 
 		if (configuration.hasChanged())

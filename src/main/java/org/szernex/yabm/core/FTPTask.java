@@ -74,7 +74,7 @@ public class FTPTask implements Runnable
 				LogHelper.warn("Failed to login - Aborting upload.");
 			}
 		}
-		catch(IOException ex)
+		catch (IOException ex)
 		{
 			LogHelper.error("FTP upload failed: %s", ex.getMessage());
 			ex.printStackTrace();

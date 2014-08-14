@@ -12,8 +12,6 @@ import java.util.zip.ZipOutputStream;
 
 public class FileHelper
 {
-	public static final String TIMESTAMP_FORMAT = "y-MM-dd_HH-mm-ss";
-
 	public static class BackupFileFilter implements FileFilter
 	{
 		private String nameFilter = "";
@@ -35,15 +33,7 @@ public class FileHelper
 		}
 	}
 
-	public static final FileFilter DIR_FILTER = new FileFilter()
-	{
-		@Override
-		public boolean accept(File file)
-		{
-			return file.isDirectory();
-		}
-	};
-
+	public static final String TIMESTAMP_FORMAT = "y-MM-dd_HH-mm-ss";
 
 	public static String getArchiveFileName(String prefix, boolean includetimestamp)
 	{
