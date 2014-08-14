@@ -101,7 +101,7 @@ public class ConfigHandler
 				               0,
 				               0,
 				               Integer.MAX_VALUE,
-				               "The maximum number of backups to keep per world. 0 disables this functionality. Persistent backups are excluded from this."
+				               "The maximum number of backups to keep per world. -1 disables this functionality. Persistent backups are excluded from this."
 		               ));
 		properties.put("compressionLevel",
 		               compressionLevel = configuration.getInt(
@@ -118,7 +118,7 @@ public class ConfigHandler
 				               "ftpEnabled",
 				               cat_general,
 		                       false,
-		                       "Turns uploading backups via FTP on/off. If FTP uploads are enabled no local backups will be stored and consolidation and persistent backups are disabled."
+		                       "Turns uploading backups via FTP on/off. If you want to not keep any local backups set maxBackupCount to 0 and persistentEnabled to false."
 		               ));
 		properties.put("ftpLocation",
 		               ftpLocation = configuration.getString(
