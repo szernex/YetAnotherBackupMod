@@ -32,6 +32,12 @@ public class CommandSet extends CommandBase
 	@Override
 	public void processCommand(ICommandSender sender, String[] args)
 	{
+		if (args.length < 2)
+		{
+			ChatHelper.sendUserChatMsg(sender, ChatHelper.getLocalizedMsg("commands.yabm.set.usage"));
+			return;
+		}
+
 		String key = args[0];
 		String[] values = Arrays.copyOfRange(args, 1, args.length);
 

@@ -1,16 +1,26 @@
+v1.7.10-1.0.1
+* Changed: YABM is not required on the client when connecting to a server which has it installed
+* Fixed: Parameter checks for commands which previously caused error messages
+* Fixed: Backups getting consolidated when FTP upload is enabled and fails
+* Fixed: Bug with single schedule times (backups now have a 60 second "cooldown")
+
+
 v1.7.10-0.5.5
 * Changed: FTP upload no longer automatically deletes backup files
 * Changed: maxBackupCount can be set to 0 to not keep any backup files (to work in conjunction with FTP upload) or -1 to disable consolidation
+
 
 v1.7.10-0.5.4
 * Added: Prototype FTP upload functionality
 * Fixed: World auto-saving not properly being turned off during backups
 * Fixed: Threads actually being started for backups
 
+
 v1.7.10-0.5.1
 * Complete overhaul of the code
 * Features are still the same, but code has been streamlined and optimized
 * Last beta version
+
 
 v1.7.10-0.4.1
 * Added: Persistent backups; options can be found in the config
