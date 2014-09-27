@@ -3,6 +3,7 @@ package org.szernex.yabm.command;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import org.szernex.yabm.YABM;
+import org.szernex.yabm.util.ChatHelper;
 import org.szernex.yabm.util.StringHelper;
 
 import java.util.*;
@@ -41,11 +42,21 @@ public class CommandYABM extends CommandBase
 	@Override
 	public void processCommand(ICommandSender sender, String[] args)
 	{
+		if (args.length == 0)
+		{
+			ChatHelper.sendUserChatMsg(sender, ChatHelper.getLocalizedMsg("commands.yabm.general.usage"));
+			return;
+		}
+
 		String sub_command = args[0].toLowerCase();
 
 		if (availableCommands.containsKey(sub_command))
 		{
 			availableCommands.get(sub_command).processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+		}
+		else
+		{
+			ChatHelper.sendUserChatMsg(sender, ChatHelper.getLocalizedMsg("commands.yabm.general.invalid_key"));
 		}
 
 		YABM.backupTickHandler.updateScheduleTime();

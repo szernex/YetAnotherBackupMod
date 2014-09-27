@@ -17,6 +17,12 @@ public class FTPTask implements Runnable
 	private String ftpUsername;
 	private String ftpPassword;
 	private String ftpLocation;
+	private boolean lastTaskSucceeded = false;
+
+	public boolean didLastTaskSucceed()
+	{
+		return lastTaskSucceeded;
+	}
 
 	public void init(File target_file, String server, int port, String username, String password, String location)
 	{
@@ -35,6 +41,8 @@ public class FTPTask implements Runnable
 		ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.ftp.start"));
 
 		FTPClient ftp_client = new FTPClient();
+
+		lastTaskSucceeded = false;
 
 		try
 		{
@@ -62,6 +70,7 @@ public class FTPTask implements Runnable
 				{
 					ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.ftp.upload_success"));
 					LogHelper.info("Uploaded successfully.");
+					lastTaskSucceeded = true;
 				}
 				else
 				{
@@ -78,6 +87,7 @@ public class FTPTask implements Runnable
 		{
 			LogHelper.error("FTP upload failed: %s", ex.getMessage());
 			ex.printStackTrace();
+			ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.error.ftp.upload_failed"));
 		}
 		finally
 		{

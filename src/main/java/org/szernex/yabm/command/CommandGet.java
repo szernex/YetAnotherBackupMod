@@ -32,6 +32,12 @@ public class CommandGet extends CommandBase
 	@Override
 	public void processCommand(ICommandSender sender, String[] args)
 	{
+		if (args.length == 0)
+		{
+			ChatHelper.sendUserChatMsg(sender, ChatHelper.getLocalizedMsg("commands.yabm.get.usage"));
+			return;
+		}
+
 		String key = args[0];
 
 		if (ConfigHandler.properties.containsKey(key))

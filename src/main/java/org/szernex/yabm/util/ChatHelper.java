@@ -4,14 +4,14 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.StatCollector;
 
 public class ChatHelper
 {
 	public static IChatComponent getLocalizedMsg(String key, Object... args)
 	{
-		return new ChatComponentTranslation(key, args);
+		return new ChatComponentText(StatCollector.translateToLocalFormatted(key, args));
 	}
 
 	public static IChatComponent getFormattedMsg(String format, Object... args)

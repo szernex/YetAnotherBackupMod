@@ -10,8 +10,11 @@ yabm.backup.error.archive_failed=Failed to create backup archive - Check logs fo
 yabm.backup.error.ftp.upload_failed=FTP upload failed.
 
 commands.yabm.general.usage=/yabm <get|set|startbackup> [key] [value]
+commands.yabm.general.invalid_key=No command %s
+commands.yabm.get.usage=/yabm get <key>
 commands.yabm.get.success=Value for %s: %s
 commands.yabm.get.invalid_key=No property %s
+commands.yabm.set.usage=/yabm set <key> <value [value2 [value3 [...]]]>
 commands.yabm.set.success=Set %s to %s
 commands.yabm.set.invalid_key=No property %s
 commands.yabm.startbackup.start=%s manually started a backup...

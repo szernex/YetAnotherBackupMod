@@ -13,7 +13,13 @@ public class BackupManager implements Runnable
 {
 	private BackupTask backupTask = new BackupTask();
 	private FTPTask ftpTask = new FTPTask();
+	private boolean running = false;
 
+
+	public boolean isRunning()
+	{
+		return running;
+	}
 
 	private boolean isPersistentBackup()
 	{
@@ -122,6 +128,10 @@ public class BackupManager implements Runnable
 	@Override
 	public void run()
 	{
+		running = true;
+
+		boolean do_consolidation = true;
+
 		backupTask.init((isPersistentBackup() ? ConfigHandler.persistentLocation : ConfigHandler.backupLocation),
 		                ConfigHandler.backupPrefix,
 		                ConfigHandler.backupList,
@@ -144,9 +154,15 @@ public class BackupManager implements Runnable
 			}
 
 			startAndWaitForThread(ftpTask);
+			do_consolidation = ftpTask.didLastTaskSucceed();
 		}
 
-		consolidateBackups();
+		if (do_consolidation)
+		{
+			consolidateBackups();
+		}
+
+		running = false;
 	}
 
 	public void startBackup()
