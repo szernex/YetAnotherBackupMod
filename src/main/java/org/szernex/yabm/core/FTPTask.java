@@ -76,6 +76,13 @@ public class FTPTask implements Runnable
 				{
 					ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.error.ftp.upload_failed"));
 					LogHelper.warn("Upload failed.");
+
+					String[] replies = ftp_client.getReplyStrings();
+
+					for (int i = 0; i < replies.length; i++)
+					{
+						LogHelper.warn(replies[i]);
+					}
 				}
 			}
 			else
