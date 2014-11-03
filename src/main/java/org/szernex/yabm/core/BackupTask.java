@@ -12,6 +12,7 @@ import org.szernex.yabm.util.LogHelper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class BackupTask implements Runnable
@@ -111,8 +112,17 @@ public class BackupTask implements Runnable
 
 			source_files.addAll(FileHelper.getDirectoryContents(world_dir));
 			LogHelper.info("Archiving %d files...", source_files.size());
+			
+			// Convert all paths to relative paths.
+			// This only works if the working directory is the ancestor of all paths.
+			File working_dir = new File("").getAbsoluteFile();
+			Set<File> relative_source_files = new HashSet<File>();
+			for (File f : source_files)
+			{
+				relative_source_files.add(new File(working_dir.toURI().relativize(f.toURI()).getPath()));
+			}
 
-			if (FileHelper.createZipArchive(target_file, source_files, compressionLevel))
+			if (FileHelper.createZipArchive(target_file, relative_source_files, compressionLevel))
 			{
 				LogHelper.info("Successfully created backup archive.");
 			}
