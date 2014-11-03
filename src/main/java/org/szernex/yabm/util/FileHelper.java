@@ -106,7 +106,7 @@ public class FileHelper
 
 		for (String f : source_list)
 		{
-			File file = new File(f).getCanonicalFile();
+			File file = new File(f);
 
 			if (file.exists())
 			{

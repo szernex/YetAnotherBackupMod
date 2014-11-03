@@ -64,7 +64,7 @@ public class ConfigHandler
 				               "backupList",
 				               cat_general,
 				               backupList,
-				               "The list of files and folders to include in the backup."
+				               "The list of files and folders to include in the backup (additionally to the current world save)."
 		               ));
 		properties.put("backupPrefix",
 		               backupPrefix = configuration.getString(
