@@ -53,9 +53,8 @@ public class BackupTask implements Runnable
 		try
 		{
 			File target_dir = new File(targetPath).getCanonicalFile();
-			File world_dir = DimensionManager.getCurrentSaveRootDirectory().getCanonicalFile();
+			File world_dir = new File(new File(".").toURI().relativize(DimensionManager.getCurrentSaveRootDirectory().toURI()).getPath());
 			File target_file = new File(target_dir, FileHelper.getArchiveFileName(filePrefix, true) + ".zip");
-
 
 			if (target_file.exists())
 			{
