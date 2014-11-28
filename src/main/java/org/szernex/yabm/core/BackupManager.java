@@ -87,7 +87,7 @@ public class BackupManager implements Runnable
 			Arrays.sort(files);
 
 			files = Arrays.copyOfRange(files, 0, files.length - ConfigHandler.maxBackupCount);
-			ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.general.backup_consolidation", files.length, (files.length > 0 ? "s" : "")));
+			ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.general.backup_consolidation", files.length, (files.length > 1 ? "s" : "")));
 
 			for (File f : files)
 			{

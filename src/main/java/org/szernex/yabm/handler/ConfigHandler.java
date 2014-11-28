@@ -18,6 +18,7 @@ public class ConfigHandler
 	public static boolean backupEnabled = true;
 	public static String backupLocation = "../backups";
 	public static String[] backupList = new String[]{"banned-ips.json", "banned-players.json", "ops.json", "options.json", "options.txt", "server.properties", "usercache.json", "whitelist.json", "config", "crash-reports", "logs", "mods", "resourcepacks"};
+	public static boolean backupFullSave = true;
 	public static String backupPrefix = "backup";
 	public static String backupSchedule = "12:00";
 	public static boolean persistentEnabled = true;
@@ -65,6 +66,13 @@ public class ConfigHandler
 				               cat_general,
 				               backupList,
 				               "The list of files and folders to include in the backup (additionally to the current world save)."
+		               ));
+		properties.put("backupFullSave",
+		               backupFullSave = configuration.getBoolean(
+				               "backupFullSave",
+		                       cat_general,
+		                       backupFullSave,
+		                       "Tells YABM whether to backup the whole save directory or not. In most cases you want this enabled."
 		               ));
 		properties.put("backupPrefix",
 		               backupPrefix = configuration.getString(
