@@ -5,6 +5,7 @@ import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import org.szernex.yabm.handler.ConfigHandler;
 import org.szernex.yabm.util.ChatHelper;
 import org.szernex.yabm.util.FileHelper;
 import org.szernex.yabm.util.LogHelper;
@@ -109,7 +110,12 @@ public class BackupTask implements Runnable
 			// create backup archive
 			Set<File> source_files = FileHelper.getFileList(sourceList);
 
-			source_files.addAll(FileHelper.getDirectoryContents(world_dir));
+			if (ConfigHandler.backupFullSave)
+			{
+				LogHelper.info("Adding world save..:");
+				source_files.addAll(FileHelper.getDirectoryContents(world_dir));
+			}
+
 			LogHelper.info("Archiving %d files...", source_files.size());
 
 			if (FileHelper.createZipArchive(target_file, source_files, compressionLevel))
