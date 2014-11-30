@@ -23,6 +23,7 @@ public class ConfigHandler
 	public static String backupSchedule = "12:00";
 	public static boolean persistentEnabled = true;
 	public static String persistentLocation = "../backups/persistent";
+	public static int maxPersistentCount = 7;
 	public static int maxBackupCount = 10;
 	public static int compressionLevel = 9;
 	public static boolean ftpEnabled = false;
@@ -102,12 +103,21 @@ public class ConfigHandler
 				               "../backups/persistent",
 				               "The path where to store persistent backups. Can be a path relative to the Minecraft installation root."
 		               ));
+		properties.put("maxPersistentCount",
+		               maxPersistentCount = configuration.getInt(
+				               "maxPersistentCount",
+		                       cat_general,
+		                       maxPersistentCount,
+		                       -1,
+		                       Integer.MAX_VALUE,
+		                       "The maximum number of persistent backups to keep per world. -1 disables this functionality. Normal backups are excluded from this."
+		               ));
 		properties.put("maxBackupCount",
 		               maxBackupCount = configuration.getInt(
 				               "maxBackupCount",
 				               cat_general,
-				               10,
-				               0,
+				               maxBackupCount,
+				               -1,
 				               Integer.MAX_VALUE,
 				               "The maximum number of backups to keep per world. -1 disables this functionality. Persistent backups are excluded from this."
 		               ));

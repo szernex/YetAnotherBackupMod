@@ -1,3 +1,10 @@
+v1.7.10-10.0.6
+* Added: Config option 'maxPersistentCount' to control how many persistent backups to keep (works just like maxBackupCount)
+* Fixed: Hard coded values and wrong min-value for maxBackupCount option
+
+v1.7.10-1.0.5
+* Added: Config option 'backupFullSave' to control if the full world save should be included in backups (thanks to r/ canilsen)
+
 v1.7.10-1.0.4
 * Changed: Changed files getting stored with full path hierarchy (eg "/home/myuser/minecraftinstall/somefiles" to "somefiles") - thanks to NomAnor
 

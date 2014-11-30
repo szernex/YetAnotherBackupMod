@@ -59,9 +59,9 @@ public class BackupManager implements Runnable
 		}
 	}
 
-	private void consolidateBackups()
+	private void consolidateBackups(String path, int max_backups)
 	{
-		if (ConfigHandler.maxBackupCount < 0)
+		if (max_backups < 0)
 		{
 			return;
 		}
@@ -70,7 +70,7 @@ public class BackupManager implements Runnable
 
 		try
 		{
-			File target_path = new File(ConfigHandler.backupLocation).getCanonicalFile();
+			File target_path = new File(path).getCanonicalFile();
 
 			if (!target_path.exists())
 			{
@@ -79,14 +79,14 @@ public class BackupManager implements Runnable
 
 			File[] files = target_path.listFiles(new FileHelper.BackupFileFilter(archive_name));
 
-			if (files.length <= ConfigHandler.maxBackupCount)
+			if (files.length <= max_backups)
 			{
 				return;
 			}
 
 			Arrays.sort(files);
 
-			files = Arrays.copyOfRange(files, 0, files.length - ConfigHandler.maxBackupCount);
+			files = Arrays.copyOfRange(files, 0, files.length - max_backups);
 			ChatHelper.sendServerChatMsg(ChatHelper.getLocalizedMsg("yabm.backup.general.backup_consolidation", files.length, (files.length > 1 ? "s" : "")));
 
 			for (File f : files)
@@ -159,7 +159,8 @@ public class BackupManager implements Runnable
 
 		if (do_consolidation)
 		{
-			consolidateBackups();
+			consolidateBackups(ConfigHandler.backupLocation, ConfigHandler.maxBackupCount);
+			consolidateBackups(ConfigHandler.persistentLocation, ConfigHandler.maxPersistentCount);
 		}
 
 		running = false;
