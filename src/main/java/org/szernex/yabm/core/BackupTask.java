@@ -112,7 +112,7 @@ public class BackupTask implements Runnable
 
 			if (ConfigHandler.backupFullSave)
 			{
-				LogHelper.info("Adding world save..:");
+				LogHelper.info("Adding world save...");
 				source_files.addAll(FileHelper.getDirectoryContents(world_dir));
 			}
 
