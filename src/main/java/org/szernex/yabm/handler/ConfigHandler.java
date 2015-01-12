@@ -17,7 +17,7 @@ public class ConfigHandler
 	public static Map<String, Object> properties = new HashMap<String, Object>();
 	public static boolean backupEnabled = true;
 	public static String backupLocation = "../backups";
-	public static String[] backupList = new String[]{"banned-ips.json", "banned-players.json", "ops.json", "options.json", "options.txt", "server.properties", "usercache.json", "whitelist.json", "config", "crash-reports", "logs", "mods", "resourcepacks"};
+	public static String[] backupList = new String[]{"banned-ips.json", "banned-players.json", "ops.json", "options.json", "options.txt", "server.properties", "usercache.json", "whitelist.json", "config", "crash-reports", "mods", "resourcepacks"};
 	public static boolean backupFullSave = true;
 	public static String backupPrefix = "backup";
 	public static String backupSchedule = "12:00";
