@@ -145,7 +145,7 @@ public class BackupManager implements Runnable
 		{
 			if (ConfigHandler.ftpPersistentOnly)
 			{
-				if (ConfigHandler.persistentEnabled)
+				if (is_persistent)
 				{
 					ftpTask.init(backupTask.getLastBackupFile(),
 					             ConfigHandler.ftpServer,
