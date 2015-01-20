@@ -32,6 +32,7 @@ public class FTPTask implements Runnable
 		ftpUsername = username;
 		ftpPassword = password;
 		ftpLocation = location;
+		lastTaskSucceeded = false;
 	}
 
 	@Override

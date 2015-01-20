@@ -131,8 +131,9 @@ public class BackupManager implements Runnable
 		running = true;
 
 		boolean do_consolidation = true;
+		boolean is_persistent = isPersistentBackup();
 
-		backupTask.init((isPersistentBackup() ? ConfigHandler.persistentLocation : ConfigHandler.backupLocation),
+		backupTask.init((is_persistent ? ConfigHandler.persistentLocation : ConfigHandler.backupLocation),
 		                ConfigHandler.backupPrefix,
 		                ConfigHandler.backupList,
 		                ConfigHandler.compressionLevel
@@ -140,9 +141,25 @@ public class BackupManager implements Runnable
 
 		startAndWaitForThread(backupTask);
 
-		if (ConfigHandler.ftpEnabled)
+		if (ConfigHandler.ftpEnabled && backupTask.getLastBackupFile() != null)
 		{
-			if (backupTask.getLastBackupFile() != null)
+			if (ConfigHandler.ftpPersistentOnly)
+			{
+				if (ConfigHandler.persistentEnabled)
+				{
+					ftpTask.init(backupTask.getLastBackupFile(),
+					             ConfigHandler.ftpServer,
+					             ConfigHandler.ftpPort,
+					             ConfigHandler.ftpUsername,
+					             ConfigHandler.ftpPassword,
+					             ConfigHandler.ftpLocation
+					);
+
+					startAndWaitForThread(ftpTask);
+					do_consolidation = ftpTask.didLastTaskSucceed();
+				}
+			}
+			else
 			{
 				ftpTask.init(backupTask.getLastBackupFile(),
 				             ConfigHandler.ftpServer,
@@ -151,10 +168,10 @@ public class BackupManager implements Runnable
 				             ConfigHandler.ftpPassword,
 				             ConfigHandler.ftpLocation
 				);
-			}
 
-			startAndWaitForThread(ftpTask);
-			do_consolidation = ftpTask.didLastTaskSucceed();
+				startAndWaitForThread(ftpTask);
+				do_consolidation = ftpTask.didLastTaskSucceed();
+			}
 		}
 
 		if (do_consolidation)

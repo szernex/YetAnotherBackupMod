@@ -1,3 +1,6 @@
+v1.7.10-10.0.8
+* Added: Config option "ftpPersistentOnly" to enable FTP upload only for persistent backups (thanks to hbh7)
+
 v1.7.10-10.0.6
 * Added: Config option 'maxPersistentCount' to control how many persistent backups to keep (works just like maxBackupCount)
 * Fixed: Hard coded values and wrong min-value for maxBackupCount option

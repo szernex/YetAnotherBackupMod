@@ -27,6 +27,7 @@ public class ConfigHandler
 	public static int maxBackupCount = 10;
 	public static int compressionLevel = 9;
 	public static boolean ftpEnabled = false;
+	public static boolean ftpPersistentOnly = false;
 	public static String ftpLocation = "backups";
 	public static String ftpServer = "";
 	public static int ftpPort = 21;
@@ -137,6 +138,13 @@ public class ConfigHandler
 				               cat_general,
 				               false,
 				               "Turns uploading backups via FTP on/off. If you want to not keep any local backups set maxBackupCount to 0 and persistentEnabled to false."
+		               ));
+		properties.put("ftpPersistentOnly",
+		               ftpPersistentOnly = configuration.getBoolean(
+				               "ftpPersistentOnly",
+		                       cat_general,
+		                       false,
+		                       "Only upload persistent backups via FTP (persistent backups have to be enabled)."
 		               ));
 		properties.put("ftpLocation",
 		               ftpLocation = configuration.getString(
